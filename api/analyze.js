@@ -90,7 +90,7 @@ module.exports = async function handler(req, res) {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Kuch gadbad ho gayi. Thodi der baad try karein." });
+    res.status(500).json({ error: "Kuch gadbad ho gayi: " + (err && err.message ? err.message : String(err)) });
   }
 };
 
@@ -108,6 +108,16 @@ async function resolveChannelId(rawInput, key) {
 
   let m = input.match(/channel\/(UC[\w-]{10,})/);
   if (m) return m[1];
+
+  // If someone pastes a video link instead of a channel link, resolve the
+  // video's channel automatically instead of failing.
+  m = input.match(/(?:youtu\.be\/|watch\?v=|shorts\/)([\w-]{11})/);
+  if (m) {
+    const vr = await fetchJSON(
+      `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${m[1]}&key=${key}`
+    ).catch(() => null);
+    if (vr && vr.items && vr.items[0]) return vr.items[0].snippet.channelId;
+  }
 
   m = input.match(/@([\w.-]+)/);
   if (m) {
