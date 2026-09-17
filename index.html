@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NextUpload — know what to post next</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E1420;
+    --surface:#161D2E;
+    --surface-2:#1D263C;
+    --line:#2A3550;
+    --text:#F2EFE9;
+    --muted:#9AA3B5;
+    --amber:#F2A93B;
+    --amber-dim:#8a6a2b;
+    --tally:#E4572E;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
+  a{color:inherit;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
+
+  header.top{
+    padding:28px 0 8px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;
+    font-weight:600;font-size:18px;
+  }
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--tally);box-shadow:0 0 10px var(--tally);}
+
+  .hero{padding:56px 0 40px;border-bottom:1px solid var(--line);}
+  .hero h1{
+    font-size:44px;line-height:1.12;font-weight:700;margin:0 0 18px;max-width:11ch;
+    letter-spacing:-0.5px;
+  }
+  .hero p.sub{color:var(--muted);font-size:17px;max-width:52ch;margin:0 0 32px;}
+
+  .analyzer{
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px;
+    display:flex;gap:6px;max-width:560px;
+  }
+  .analyzer input{
+    flex:1;background:transparent;border:none;color:var(--text);font-size:15px;
+    padding:14px 14px;outline:none;font-family:'Inter',sans-serif;
+  }
+  .analyzer input::placeholder{color:var(--muted);}
+  .analyzer button{
+    background:var(--amber);color:#191204;border:none;border-radius:9px;
+    padding:0 22px;font-weight:600;font-size:14.5px;cursor:pointer;font-family:'Inter',sans-serif;
+    transition:background .15s ease;
+  }
+  .analyzer button:hover{background:#ffbb4d;}
+  .analyzer button:disabled{opacity:.55;cursor:progress;}
+
+  .hint{color:var(--muted);font-size:13px;margin-top:10px;}
+  .hint b{color:var(--text);font-weight:600;}
+
+  .status{margin-top:22px;font-size:14.5px;color:var(--muted);min-height:1em;}
+  .status.err{color:#f2a3a3;}
+
+  section.results{padding:36px 0 8px;display:none;}
+  section.results.show{display:block;}
+  .channel-line{color:var(--muted);font-size:14px;margin-bottom:22px;}
+  .channel-line b{color:var(--text);}
+
+  .idea{
+    border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:14px;background:var(--surface);
+  }
+  .idea .n{color:var(--amber);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;margin-bottom:8px;}
+  .idea h3{font-size:19px;margin:0 0 10px;font-weight:600;}
+  .idea .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .idea .tags span{
+    background:var(--surface-2);border:1px solid var(--line);color:var(--muted);
+    font-size:12.5px;padding:4px 10px;border-radius:20px;
+  }
+  .idea .reason{color:var(--muted);font-size:14px;margin:0;}
+
+  section.pricing{padding:44px 0 60px;border-top:1px solid var(--line);display:none;}
+  section.pricing.show{display:block;}
+  section.pricing h2{font-size:24px;margin:0 0 6px;}
+  section.pricing > p{color:var(--muted);margin:0 0 26px;font-size:14.5px;}
+
+  .plans{border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  .plan-row{
+    display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:center;
+    padding:18px 22px;border-bottom:1px solid var(--line);
+  }
+  .plan-row:last-child{border-bottom:none;}
+  .plan-row .name{font-weight:600;font-size:15.5px;}
+  .plan-row .desc{color:var(--muted);font-size:13.5px;margin-top:3px;}
+  .plan-row .price{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--amber);white-space:nowrap;}
+  .plan-row button{
+    background:transparent;border:1px solid var(--amber);color:var(--amber);
+    padding:9px 18px;border-radius:8px;font-weight:600;font-size:13.5px;cursor:pointer;
+    font-family:'Inter',sans-serif;white-space:nowrap;
+  }
+  .plan-row button:hover{background:var(--amber);color:#191204;}
+
+  .disclaimer{color:var(--muted);font-size:12.5px;margin-top:18px;max-width:60ch;}
+
+  /* modal */
+  .overlay{
+    position:fixed;inset:0;background:rgba(6,9,16,.72);display:none;align-items:center;justify-content:center;
+    padding:20px;z-index:50;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--surface);border:1px solid var(--line);border-radius:16px;max-width:420px;width:100%;
+    padding:28px;
+  }
+  .modal h3{margin:0 0 6px;font-size:19px;}
+  .modal p.small{color:var(--muted);font-size:13.5px;margin:0 0 18px;}
+  .qr-box{background:#fff;border-radius:10px;padding:14px;display:flex;justify-content:center;margin-bottom:14px;}
+  .qr-box img{width:180px;height:180px;display:block;}
+  .upi-line{
+    display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:9px;padding:10px 14px;font-size:13.5px;margin-bottom:18px;
+  }
+  .upi-line code{color:var(--amber);}
+  .modal label{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px;}
+  .modal input{
+    width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
+    color:var(--text);padding:11px 12px;font-size:14px;font-family:'Inter',sans-serif;outline:none;
+  }
+  .modal .actions{display:flex;gap:10px;margin-top:20px;}
+  .modal .actions button{
+    flex:1;border-radius:9px;padding:12px;font-weight:600;font-size:14px;cursor:pointer;border:none;
+    font-family:'Inter',sans-serif;
+  }
+  .btn-cancel{background:transparent;color:var(--muted);border:1px solid var(--line) !important;}
+  .btn-confirm{background:var(--amber);color:#191204;}
+  .modal .note{color:var(--muted);font-size:12px;margin-top:14px;}
+
+  footer{padding:30px 0 50px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);}
+
+  @media (max-width:600px){
+    .hero h1{font-size:32px;max-width:none;}
+    .analyzer{flex-direction:column;}
+    .analyzer button{padding:13px;}
+    .plan-row{grid-template-columns:1fr;}
+    .plan-row .price{justify-self:start;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span> NextUpload</div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Know what to upload next.</h1>
+    <p class="sub">Paste your YouTube channel link. We look at what's actually working on your channel and suggest your next video's title and tags — based on your real numbers, not guesswork.</p>
+
+    <div class="analyzer">
+      <input id="channelInput" type="text" placeholder="youtube.com/@yourchannel or channel link" />
+      <button id="analyzeBtn">Analyze — free</button>
+    </div>
+    <p class="hint">First analysis is <b>free</b>. One per browser — after that, unlock more ideas below.</p>
+    <p class="status" id="status"></p>
+  </div>
+</section>
+
+<section class="results" id="resultsSection">
+  <div class="wrap">
+    <p class="channel-line" id="channelLine"></p>
+    <div id="ideasList"></div>
+  </div>
+</section>
+
+<section class="pricing" id="pricingSection">
+  <div class="wrap">
+    <h2>Want more video ideas?</h2>
+    <p>Each pack analyzes your channel fresh and gives you that many ready-to-use ideas.</p>
+
+    <div class="plans">
+      <div class="plan-row">
+        <div>
+          <div class="name">Quick pack</div>
+          <div class="desc">2 video ideas with titles &amp; tags</div>
+        </div>
+        <div class="price">₹20</div>
+        <button data-plan="plan20" data-amount="20" data-count="2" class="unlockBtn">Unlock</button>
+      </div>
+      <div class="plan-row">
+        <div>
+          <div class="name">Week pack</div>
+          <div class="desc">7 video ideas — a full week of uploads planned</div>
+        </div>
+        <div class="price">₹49</div>
+        <button data-plan="plan49" data-amount="49" data-count="7" class="unlockBtn">Unlock</button>
+      </div>
+      <div class="plan-row">
+        <div>
+          <div class="name">Bumper pack</div>
+          <div class="desc">15 video ideas in one go</div>
+        </div>
+        <div class="price">₹99</div>
+        <button data-plan="plan99" data-amount="99" data-count="15" class="unlockBtn">Unlock</button>
+      </div>
+    </div>
+
+    <p class="disclaimer">These are content suggestions based on your channel's own data — not a guarantee of views, subscribers or earnings. Growth still depends on your content, consistency and audience.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">NextUpload · built for creators who want a data-based next step, not a promise.</div>
+</footer>
+
+<!-- Payment modal -->
+<div class="overlay" id="payOverlay">
+  <div class="modal">
+    <h3 id="modalPlanName">Unlock pack</h3>
+    <p class="small">Pay via UPI, then enter your transaction (UTR) number below. We'll verify and your ideas will unlock right after.</p>
+
+    <div class="qr-box">
+      <img id="qrImg" src="" alt="UPI QR code" />
+    </div>
+    <div class="upi-line">
+      <span>UPI ID</span>
+      <code>yashy7630@okhdfcbank</code>
+    </div>
+
+    <label for="utrInput">UPI transaction / UTR number</label>
+    <input id="utrInput" type="text" placeholder="e.g. 402719283746" />
+    <label for="emailInput">Your email (optional, for support)</label>
+    <input id="emailInput" type="email" placeholder="you@email.com" />
+
+    <div class="actions">
+      <button class="btn-cancel" id="cancelPay">Cancel</button>
+      <button class="btn-confirm" id="confirmPay">I've paid — unlock</button>
+    </div>
+    <p class="note">Manual verification: submitting logs your payment for review. If UTR doesn't match a real payment, access may be revoked.</p>
+  </div>
+</div>
+
+<script>
+const analyzeBtn = document.getElementById('analyzeBtn');
+const channelInput = document.getElementById('channelInput');
+const statusEl = document.getElementById('status');
+const resultsSection = document.getElementById('resultsSection');
+const pricingSection = document.getElementById('pricingSection');
+const channelLine = document.getElementById('channelLine');
+const ideasList = document.getElementById('ideasList');
+
+let lastChannelUrl = '';
+
+function renderIdeas(data, append){
+  if(!append) ideasList.innerHTML = '';
+  const startIndex = ideasList.children.length;
+  data.ideas.forEach((idea, i) => {
+    const div = document.createElement('div');
+    div.className = 'idea';
+    const tags = (idea.tags || []).map(t => `<span>#${escapeHtml(String(t).replace(/^#/,''))}</span>`).join('');
+    div.innerHTML = `
+      <div class="n">IDEA ${startIndex + i + 1}</div>
+      <h3>${escapeHtml(idea.title || 'Untitled idea')}</h3>
+      <div class="tags">${tags}</div>
+      <p class="reason">${escapeHtml(idea.reason || '')}</p>
+    `;
+    ideasList.appendChild(div);
+  });
+  channelLine.innerHTML = `Analyzed <b>${escapeHtml(data.channelTitle)}</b> — ${Number(data.subscribers).toLocaleString('en-IN')} subscribers, ${data.recentVideoCount} recent videos looked at.`;
+  resultsSection.classList.add('show');
+  pricingSection.classList.add('show');
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+async function runAnalyze(plan, append){
+  const channelUrl = channelInput.value.trim();
+  if(!channelUrl){
+    statusEl.textContent = 'Pehle apna channel link daalein.';
+    statusEl.classList.add('err');
+    return;
+  }
+  lastChannelUrl = channelUrl;
+  statusEl.classList.remove('err');
+  statusEl.textContent = 'Analyzing your channel… (10-20 seconds)';
+  analyzeBtn.disabled = true;
+
+  try{
+    const res = await fetch('/api/analyze', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ channelUrl, plan })
+    });
+    const data = await res.json();
+    if(!res.ok){
+      statusEl.textContent = data.error || 'Kuch gadbad ho gayi.';
+      statusEl.classList.add('err');
+      analyzeBtn.disabled = false;
+      return;
+    }
+    statusEl.textContent = '';
+    renderIdeas(data, append);
+    if(plan === 'free') localStorage.setItem('nu_free_used', '1');
+  }catch(e){
+    statusEl.textContent = 'Network error, dobara try karein.';
+    statusEl.classList.add('err');
+  }
+  analyzeBtn.disabled = false;
+}
+
+analyzeBtn.addEventListener('click', () => {
+  const freeUsed = localStorage.getItem('nu_free_used');
+  if(freeUsed){
+    statusEl.textContent = 'Free analysis is already used on this browser. Neeche se ek pack unlock karein.';
+    statusEl.classList.add('err');
+    pricingSection.classList.add('show');
+    return;
+  }
+  runAnalyze('free', false);
+});
+
+// Payment modal logic
+const payOverlay = document.getElementById('payOverlay');
+const qrImg = document.getElementById('qrImg');
+const modalPlanName = document.getElementById('modalPlanName');
+const cancelPay = document.getElementById('cancelPay');
+const confirmPay = document.getElementById('confirmPay');
+const utrInput = document.getElementById('utrInput');
+const emailInput = document.getElementById('emailInput');
+
+let currentPlan = null, currentAmount = 0, currentCount = 0, currentPlanLabel = '';
+
+document.querySelectorAll('.unlockBtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(!lastChannelUrl && !channelInput.value.trim()){
+      statusEl.textContent = 'Pehle upar channel link daalke free analysis chalayein.';
+      statusEl.classList.add('err');
+      window.scrollTo({top:0, behavior:'smooth'});
+      return;
+    }
+    currentPlan = btn.dataset.plan;
+    currentAmount = btn.dataset.amount;
+    currentCount = btn.dataset.count;
+    currentPlanLabel = btn.closest('.plan-row').querySelector('.name').textContent;
+
+    modalPlanName.textContent = `Pay ₹${currentAmount} for ${currentPlanLabel}`;
+    const upiUrl = `upi://pay?pa=yashy7630@okhdfcbank&pn=NextUpload&am=${currentAmount}&cu=INR&tn=${encodeURIComponent(currentPlanLabel)}`;
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
+    utrInput.value = '';
+    emailInput.value = '';
+    payOverlay.classList.add('show');
+  });
+});
+
+cancelPay.addEventListener('click', () => payOverlay.classList.remove('show'));
+payOverlay.addEventListener('click', (e) => { if(e.target === payOverlay) payOverlay.classList.remove('show'); });
+
+confirmPay.addEventListener('click', async () => {
+  const utr = utrInput.value.trim();
+  if(!utr){
+    utrInput.style.borderColor = '#E4572E';
+    return;
+  }
+  confirmPay.disabled = true;
+  confirmPay.textContent = 'Verifying…';
+
+  // Log the payment claim to the owner's inbox via Web3Forms
+  try{
+    await fetch('https://api.web3forms.com/submit', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        access_key: 'a3db4b8a-5f8c-4c78-8bf8-1f48df50b4a8',
+        subject: `Payment claim — ${currentPlanLabel} (₹${currentAmount})`,
+        message: `Channel: ${lastChannelUrl}\nPlan: ${currentPlan}\nAmount: ₹${currentAmount}\nUTR: ${utr}\nUser email: ${emailInput.value || 'not given'}\nTime: ${new Date().toISOString()}`
+      })
+    });
+  }catch(e){}
+
+  payOverlay.classList.remove('show');
+  confirmPay.disabled = false;
+  confirmPay.textContent = "I've paid — unlock";
+
+  channelInput.value = lastChannelUrl;
+  statusEl.classList.remove('err');
+  runAnalyze(currentPlan, true);
+});
+</script>
+
+</body>
+</html>
