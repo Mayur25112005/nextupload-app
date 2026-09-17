@@ -180,7 +180,7 @@ Respond with ONLY a JSON array, no extra text, no markdown code fences, in exact
 [{"title": "video title idea", "tags": ["tag1","tag2","tag3","tag4","tag5"], "reason": "one sentence on why this should work for this channel"}]`;
 
   const r = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${geminiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
