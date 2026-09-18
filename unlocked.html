@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NextUpload — Your Ideas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0E1420;--surface:#161D2E;--surface-2:#1D263C;--line:#2A3550;--text:#F2EFE9;--muted:#9AA3B5;--amber:#F2A93B;--tally:#E4572E;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:'Inter',sans-serif;line-height:1.55;}
+  h1{font-family:'Space Grotesk',sans-serif;}
+  a{color:var(--amber);}
+  .wrap{max-width:720px;margin:0 auto;padding:40px 24px 60px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:18px;margin-bottom:26px;}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--tally);}
+  h1{font-size:26px;margin:0 0 6px;}
+  p.sub{color:var(--muted);margin:0 0 30px;font-size:14.5px;}
+  .idea{border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:14px;background:var(--surface);}
+  .idea .n{color:var(--amber);font-weight:600;font-size:13px;margin-bottom:8px;}
+  .idea h3{font-size:19px;margin:0 0 10px;font-weight:600;}
+  .idea .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .idea .tags span{background:var(--surface-2);border:1px solid var(--line);color:var(--muted);font-size:12.5px;padding:4px 10px;border-radius:20px;}
+  .idea .reason{color:var(--muted);font-size:14px;margin:0;}
+  .empty{color:var(--muted);text-align:center;padding:60px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span class="dot"></span> NextUpload</div>
+  <h1>Your ideas are ready 🎉</h1>
+  <p class="sub" id="channelLine">Loading…</p>
+  <div id="ideasList"></div>
+</div>
+<script>
+function escapeHtml(str){ const d=document.createElement('div'); d.textContent=str; return d.innerHTML; }
+const raw = localStorage.getItem('nu_unlocked_data');
+const wrap = document.getElementById('ideasList');
+const channelLine = document.getElementById('channelLine');
+if(!raw){
+  channelLine.textContent = '';
+  wrap.innerHTML = '<div class="empty">Koi unlocked ideas nahi mile. <a href="idea.html">Wapas jaake analyze karein</a>.</div>';
+}else{
+  const data = JSON.parse(raw);
+  channelLine.innerHTML = `<b>${escapeHtml(data.channelTitle)}</b> — ${Number(data.subscribers).toLocaleString('en-IN')} subscribers ke liye ${data.ideas.length} ideas.`;
+  data.ideas.forEach((idea,i)=>{
+    const tags = (idea.tags||[]).map(t=>`<span>#${escapeHtml(String(t).replace(/^#/,''))}</span>`).join('');
+    const div = document.createElement('div');
+    div.className='idea';
+    div.innerHTML = `<div class="n">IDEA ${i+1}</div><h3>${escapeHtml(idea.title||'Untitled idea')}</h3><div class="tags">${tags}</div><p class="reason">${escapeHtml(idea.reason||'')}</p>`;
+    wrap.appendChild(div);
+  });
+}
+</script>
+</body>
+</html>
