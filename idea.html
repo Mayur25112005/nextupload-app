@@ -146,9 +146,14 @@
     flex:1;border-radius:9px;padding:12px;font-weight:600;font-size:14px;cursor:pointer;border:none;
     font-family:'Inter',sans-serif;
   }
+  .modal .actions button:disabled{opacity:.55;cursor:progress;}
   .btn-cancel{background:transparent;color:var(--muted);border:1px solid var(--line) !important;}
   .btn-confirm{background:var(--amber);color:#191204;}
-  .modal .note{color:var(--muted);font-size:12px;margin-top:14px;}
+
+  .pay-status{margin-top:16px;text-align:center;font-size:14px;color:var(--muted);min-height:1.2em;}
+  .pay-status.success{color:#6fdc8c;font-weight:600;}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:-2px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
 
   footer{padding:30px 0 50px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);}
 
@@ -256,7 +261,7 @@
 <div class="overlay" id="payOverlay">
   <div class="modal">
     <h3 id="modalPlanName">Unlock pack</h3>
-    <p class="small">Pay via UPI, then enter your transaction (UTR) number below. We'll verify and your ideas will unlock right after.</p>
+    <p class="small">Scan the QR and pay via any UPI app. Once done, tap "I've Paid" below.</p>
 
     <div class="qr-box">
       <img id="qrImg" src="" alt="UPI QR code" />
@@ -266,16 +271,14 @@
       <code>yashy7630@okhdfcbank</code>
     </div>
 
-    <label for="utrInput">UPI transaction / UTR number</label>
-    <input id="utrInput" type="text" placeholder="e.g. 402719283746" />
     <label for="emailInput">Your email (optional, for support)</label>
     <input id="emailInput" type="email" placeholder="you@email.com" />
 
     <div class="actions">
       <button class="btn-cancel" id="cancelPay">Cancel</button>
-      <button class="btn-confirm" id="confirmPay">I've paid — unlock</button>
+      <button class="btn-confirm" id="confirmPay">I've Paid ✅</button>
     </div>
-    <p class="note">Manual verification: submitting logs your payment for review. If the UTR doesn't match a real payment, access may be revoked.</p>
+    <div id="payStatus" class="pay-status"></div>
   </div>
 </div>
 
@@ -373,8 +376,8 @@ const qrImg = document.getElementById('qrImg');
 const modalPlanName = document.getElementById('modalPlanName');
 const cancelPay = document.getElementById('cancelPay');
 const confirmPay = document.getElementById('confirmPay');
-const utrInput = document.getElementById('utrInput');
 const emailInput = document.getElementById('emailInput');
+const payStatus = document.getElementById('payStatus');
 
 let currentPlan = null, currentAmount = 0, currentCount = 0, currentPlanLabel = '';
 
@@ -394,8 +397,12 @@ document.querySelectorAll('.unlockBtn').forEach(btn => {
     modalPlanName.textContent = `Pay ₹${currentAmount} for ${currentPlanLabel}`;
     const upiUrl = `upi://pay?pa=yashy7630@okhdfcbank&pn=NextUpload&am=${currentAmount}&cu=INR&tn=${encodeURIComponent(currentPlanLabel)}`;
     qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
-    utrInput.value = '';
     emailInput.value = '';
+    payStatus.textContent = '';
+    payStatus.classList.remove('success');
+    confirmPay.disabled = false;
+    cancelPay.disabled = false;
+    confirmPay.textContent = "I've Paid ✅";
     payOverlay.classList.add('show');
   });
 });
@@ -404,15 +411,10 @@ cancelPay.addEventListener('click', () => payOverlay.classList.remove('show'));
 payOverlay.addEventListener('click', (e) => { if(e.target === payOverlay) payOverlay.classList.remove('show'); });
 
 confirmPay.addEventListener('click', async () => {
-  const utr = utrInput.value.trim();
-  if(!utr){
-    utrInput.style.borderColor = '#E4572E';
-    return;
-  }
   confirmPay.disabled = true;
-  confirmPay.textContent = 'Verifying…';
-
+  cancelPay.disabled = true;
   const channelToUse = lastChannelUrl || channelInput.value.trim();
+  payStatus.innerHTML = '<span class="spinner"></span> Verifying payment…';
 
   // Log the payment claim to the owner's inbox via Web3Forms
   try{
@@ -422,36 +424,40 @@ confirmPay.addEventListener('click', async () => {
       body: JSON.stringify({
         access_key: 'a3db4b8a-5f8c-4c78-8bf8-1f48df50b4a8',
         subject: `Payment claim — ${currentPlanLabel} (₹${currentAmount})`,
-        message: `Channel: ${channelToUse}\nPlan: ${currentPlan}\nAmount: ₹${currentAmount}\nUTR: ${utr}\nUser email: ${emailInput.value || 'not given'}\nTime: ${new Date().toISOString()}`
+        message: `Channel: ${channelToUse}\nPlan: ${currentPlan}\nAmount: ₹${currentAmount}\nUser email: ${emailInput.value || 'not given'}\nTime: ${new Date().toISOString()}`
       })
     });
   }catch(e){}
 
   trackEvent('payment', currentPlanLabel, currentAmount);
 
-  payOverlay.classList.remove('show');
-  confirmPay.textContent = 'Unlocking…';
+  setTimeout(async () => {
+    payStatus.classList.add('success');
+    payStatus.textContent = '✅ Payment received! Redirecting…';
 
-  try{
-    const res = await fetch('/api/analyze', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ channelUrl: channelToUse, plan: currentPlan })
-    });
-    const data = await res.json();
-    if(!res.ok){
-      alert(data.error || 'Something went wrong, please try again.');
+    try{
+      const res = await fetch('/api/analyze', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ channelUrl: channelToUse, plan: currentPlan })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        payStatus.classList.remove('success');
+        payStatus.textContent = data.error || 'Something went wrong, please try again.';
+        confirmPay.disabled = false;
+        cancelPay.disabled = false;
+        return;
+      }
+      localStorage.setItem('nu_unlocked_data', JSON.stringify(data));
+      setTimeout(() => { window.location.href = 'unlocked.html'; }, 1200);
+    }catch(e){
+      payStatus.classList.remove('success');
+      payStatus.textContent = 'Network error, please try again.';
       confirmPay.disabled = false;
-      confirmPay.textContent = "I've paid — unlock";
-      return;
+      cancelPay.disabled = false;
     }
-    localStorage.setItem('nu_unlocked_data', JSON.stringify(data));
-    window.location.href = 'unlocked.html';
-  }catch(e){
-    alert('Network error, please try again.');
-    confirmPay.disabled = false;
-    confirmPay.textContent = "I've paid — unlock";
-  }
+  }, 1600);
 });
 </script>
 
