@@ -261,6 +261,11 @@ const channelLine = document.getElementById('channelLine');
 const ideasList = document.getElementById('ideasList');
 
 let lastChannelUrl = '';
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbxHpCT_GMVGmJimn1274Bo_Rwo3TtwVdcsWEMkpQIDKECrXDT0s7jSyR7hIuyoH_8iv/exec";
+function trackEvent(type, detail, amount){
+  fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ type, detail, amount }) }).catch(()=>{});
+}
+trackEvent('visit');
 
 function renderIdeas(data, append){
   if(!append) ideasList.innerHTML = '';
@@ -391,6 +396,8 @@ confirmPay.addEventListener('click', async () => {
       })
     });
   }catch(e){}
+  
+  trackEvent('payment', currentPlanLabel, currentAmount);
 
   payOverlay.classList.remove('show');
   confirmPay.disabled = false;
