@@ -110,7 +110,7 @@
   .plan-row button:hover{background:var(--amber);color:#191204;}
 
   .disclaimer{color:var(--muted);font-size:12.5px;margin-top:18px;max-width:60ch;}
-  
+
   .locked-preview{margin-top:26px;}
   .locked-heading{color:var(--muted);font-size:13.5px;margin:0 0 14px;}
   .locked-card{position:relative;overflow:hidden;}
@@ -221,7 +221,7 @@
         <button data-plan="plan99" data-amount="99" data-count="15" class="unlockBtn">Unlock</button>
       </div>
     </div>
-    
+
     <div class="locked-preview">
       <p class="locked-heading">🔒 More ideas ready — unlock a pack above to reveal them</p>
       <div class="idea locked-card">
@@ -275,7 +275,7 @@
       <button class="btn-cancel" id="cancelPay">Cancel</button>
       <button class="btn-confirm" id="confirmPay">I've paid — unlock</button>
     </div>
-    <p class="note">Manual verification: submitting logs your payment for review. If UTR doesn't match a real payment, access may be revoked.</p>
+    <p class="note">Manual verification: submitting logs your payment for review. If the UTR doesn't match a real payment, access may be revoked.</p>
   </div>
 </div>
 
@@ -289,7 +289,7 @@ const channelLine = document.getElementById('channelLine');
 const ideasList = document.getElementById('ideasList');
 
 let lastChannelUrl = '';
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbxHpCT_GMVGmJimn1274Bo_Rwo3TtwVdcsWEMkpQIDKECrXDT0s7jSyR7hIuyoH_8iv/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxHpCT_GMVGmJimn1274Bo_Rwo3TtwVdcsWEMkpQIDKECrXDT0s7jSyR7hIuyoH_8iv/exec";
 function trackEvent(type, detail, amount){
   fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ type, detail, amount }) }).catch(()=>{});
 }
@@ -324,7 +324,7 @@ function escapeHtml(str){
 async function runAnalyze(plan, append){
   const channelUrl = channelInput.value.trim();
   if(!channelUrl){
-    statusEl.textContent = 'Pehle apna channel link daalein.';
+    statusEl.textContent = 'Please enter your channel link first.';
     statusEl.classList.add('err');
     return;
   }
@@ -341,7 +341,7 @@ async function runAnalyze(plan, append){
     });
     const data = await res.json();
     if(!res.ok){
-      statusEl.textContent = data.error || 'Kuch gadbad ho gayi.';
+      statusEl.textContent = data.error || 'Something went wrong.';
       statusEl.classList.add('err');
       analyzeBtn.disabled = false;
       return;
@@ -350,7 +350,7 @@ async function runAnalyze(plan, append){
     renderIdeas(data, append);
     if(plan === 'free') localStorage.setItem('nu_free_used', '1');
   }catch(e){
-    statusEl.textContent = 'Network error, dobara try karein.';
+    statusEl.textContent = 'Network error, please try again.';
     statusEl.classList.add('err');
   }
   analyzeBtn.disabled = false;
@@ -359,7 +359,7 @@ async function runAnalyze(plan, append){
 analyzeBtn.addEventListener('click', () => {
   const freeUsed = localStorage.getItem('nu_free_used');
   if(freeUsed){
-    statusEl.textContent = 'Free analysis is already used on this browser. Neeche se ek pack unlock karein.';
+    statusEl.textContent = 'Free analysis is already used on this browser. Unlock a pack below.';
     statusEl.classList.add('err');
     pricingSection.classList.add('show');
     return;
@@ -381,7 +381,7 @@ let currentPlan = null, currentAmount = 0, currentCount = 0, currentPlanLabel = 
 document.querySelectorAll('.unlockBtn').forEach(btn => {
   btn.addEventListener('click', () => {
     if(!lastChannelUrl && !channelInput.value.trim()){
-      statusEl.textContent = 'Pehle upar channel link daalke free analysis chalayein.';
+      statusEl.textContent = 'Please enter your channel link above and run the free analysis first.';
       statusEl.classList.add('err');
       window.scrollTo({top:0, behavior:'smooth'});
       return;
@@ -412,6 +412,8 @@ confirmPay.addEventListener('click', async () => {
   confirmPay.disabled = true;
   confirmPay.textContent = 'Verifying…';
 
+  const channelToUse = lastChannelUrl || channelInput.value.trim();
+
   // Log the payment claim to the owner's inbox via Web3Forms
   try{
     await fetch('https://api.web3forms.com/submit', {
@@ -420,25 +422,25 @@ confirmPay.addEventListener('click', async () => {
       body: JSON.stringify({
         access_key: 'a3db4b8a-5f8c-4c78-8bf8-1f48df50b4a8',
         subject: `Payment claim — ${currentPlanLabel} (₹${currentAmount})`,
-        message: `Channel: ${lastChannelUrl}\nPlan: ${currentPlan}\nAmount: ₹${currentAmount}\nUTR: ${utr}\nUser email: ${emailInput.value || 'not given'}\nTime: ${new Date().toISOString()}`
+        message: `Channel: ${channelToUse}\nPlan: ${currentPlan}\nAmount: ₹${currentAmount}\nUTR: ${utr}\nUser email: ${emailInput.value || 'not given'}\nTime: ${new Date().toISOString()}`
       })
     });
   }catch(e){}
-  
+
   trackEvent('payment', currentPlanLabel, currentAmount);
 
-    payOverlay.classList.remove('show');
+  payOverlay.classList.remove('show');
   confirmPay.textContent = 'Unlocking…';
 
   try{
     const res = await fetch('/api/analyze', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ channelUrl: lastChannelUrl, plan: currentPlan })
+      body: JSON.stringify({ channelUrl: channelToUse, plan: currentPlan })
     });
     const data = await res.json();
     if(!res.ok){
-      alert(data.error || 'Kuch gadbad ho gayi, dobara try karein.');
+      alert(data.error || 'Something went wrong, please try again.');
       confirmPay.disabled = false;
       confirmPay.textContent = "I've paid — unlock";
       return;
@@ -446,7 +448,7 @@ confirmPay.addEventListener('click', async () => {
     localStorage.setItem('nu_unlocked_data', JSON.stringify(data));
     window.location.href = 'unlocked.html';
   }catch(e){
-    alert('Network error, dobara try karein.');
+    alert('Network error, please try again.');
     confirmPay.disabled = false;
     confirmPay.textContent = "I've paid — unlock";
   }
