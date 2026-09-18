@@ -110,6 +110,12 @@
   .plan-row button:hover{background:var(--amber);color:#191204;}
 
   .disclaimer{color:var(--muted);font-size:12.5px;margin-top:18px;max-width:60ch;}
+  
+  .locked-preview{margin-top:26px;}
+  .locked-heading{color:var(--muted);font-size:13.5px;margin:0 0 14px;}
+  .locked-card{position:relative;overflow:hidden;}
+  .blur-content{filter:blur(5px);user-select:none;pointer-events:none;}
+  .lock-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(14,20,32,.4);}
 
   /* modal */
   .overlay{
@@ -213,6 +219,28 @@
         </div>
         <div class="price">₹99</div>
         <button data-plan="plan99" data-amount="99" data-count="15" class="unlockBtn">Unlock</button>
+      </div>
+    </div>
+    
+    <div class="locked-preview">
+      <p class="locked-heading">🔒 More ideas ready — unlock a pack above to reveal them</p>
+      <div class="idea locked-card">
+        <div class="blur-content">
+          <div class="n">IDEA</div>
+          <h3>A specific video idea based on your channel</h3>
+          <div class="tags"><span>#tag</span><span>#tag</span><span>#tag</span></div>
+          <p class="reason">Reasoning based on what's working on your channel.</p>
+        </div>
+        <div class="lock-overlay">🔒</div>
+      </div>
+      <div class="idea locked-card">
+        <div class="blur-content">
+          <div class="n">IDEA</div>
+          <h3>Another tailored video idea</h3>
+          <div class="tags"><span>#tag</span><span>#tag</span></div>
+          <p class="reason">Full title, tags and reasoning unlock with any pack.</p>
+        </div>
+        <div class="lock-overlay">🔒</div>
       </div>
     </div>
 
@@ -399,13 +427,29 @@ confirmPay.addEventListener('click', async () => {
   
   trackEvent('payment', currentPlanLabel, currentAmount);
 
-  payOverlay.classList.remove('show');
-  confirmPay.disabled = false;
-  confirmPay.textContent = "I've paid — unlock";
+    payOverlay.classList.remove('show');
+  confirmPay.textContent = 'Unlocking…';
 
-  channelInput.value = lastChannelUrl;
-  statusEl.classList.remove('err');
-  runAnalyze(currentPlan, true);
+  try{
+    const res = await fetch('/api/analyze', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ channelUrl: lastChannelUrl, plan: currentPlan })
+    });
+    const data = await res.json();
+    if(!res.ok){
+      alert(data.error || 'Kuch gadbad ho gayi, dobara try karein.');
+      confirmPay.disabled = false;
+      confirmPay.textContent = "I've paid — unlock";
+      return;
+    }
+    localStorage.setItem('nu_unlocked_data', JSON.stringify(data));
+    window.location.href = 'unlocked.html';
+  }catch(e){
+    alert('Network error, dobara try karein.');
+    confirmPay.disabled = false;
+    confirmPay.textContent = "I've paid — unlock";
+  }
 });
 </script>
 
