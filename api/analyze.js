@@ -21,7 +21,7 @@ module.exports = async function handler(req, res) {
     const { channelUrl, plan = "free", email = "" } = req.body || {};
 
     if (!channelUrl || typeof channelUrl !== "string") {
-      res.status(400).json({ error: "Apna channel link ya @handle daalein." });
+      res.status(400).json({ error: "Please enter your channel link or @handle." });
       return;
     }
 
@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
     if (!YT_KEY || !GEMINI_KEY) {
       res.status(500).json({
         error:
-          "Server abhi configure nahi hai. Vercel Environment Variables mein YOUTUBE_API_KEY aur GEMINI_API_KEY add karein.",
+          "Server isn't configured yet. Add YOUTUBE_API_KEY and GEMINI_API_KEY in Vercel Environment Variables.",
       });
       return;
     }
@@ -39,7 +39,7 @@ module.exports = async function handler(req, res) {
     const channelId = await resolveChannelId(channelUrl, YT_KEY);
     if (!channelId) {
       res.status(404).json({
-        error: "Channel nahi mila. Link check karein — poora YouTube channel URL ya @handle try karein.",
+        error: "Channel not found. Check the link — try the full YouTube channel URL or @handle.",
       });
       return;
     }
@@ -49,7 +49,7 @@ module.exports = async function handler(req, res) {
     );
     const channel = channelData.items && channelData.items[0];
     if (!channel) {
-      res.status(404).json({ error: "Channel ka data nahi mil paya." });
+      res.status(404).json({ error: "Couldn't fetch channel data." });
       return;
     }
 
@@ -90,7 +90,7 @@ module.exports = async function handler(req, res) {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Kuch gadbad ho gayi: " + (err && err.message ? err.message : String(err)) });
+    res.status(500).json({ error: "Something went wrong: " + (err && err.message ? err.message : String(err)) });
   }
 };
 
@@ -216,7 +216,7 @@ Respond with ONLY a JSON array, no extra text, no markdown code fences, in exact
   } catch (e) {
     return [
       {
-        title: "AI response ko samajhne mein dikkat hui",
+        title: "Couldn't understand the AI response",
         tags: [],
         reason: raw.slice(0, 400) || "Please try again.",
       },
