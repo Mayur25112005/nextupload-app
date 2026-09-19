@@ -296,6 +296,7 @@ async function runAnalyze(plan, append){
       statusEl.textContent = data.error || 'Something went wrong.';
       statusEl.classList.add('err');
       analyzeBtn.disabled = false;
+      pricingSection.classList.add('show');
       return;
     }
     statusEl.textContent = '';
@@ -397,6 +398,18 @@ document.querySelectorAll('.unlockBtn').forEach(btn => {
             setTimeout(() => { window.location.href = 'unlocked.html'; }, 1000);
           }catch(e){
             payStatus.textContent = 'Network error, please try again.';
+          }
+        },
+        config: {
+          display: {
+            blocks: {
+              utib: {
+                name: "Pay via UPI",
+                instruments: [{ method: "upi", flows: ["qr"] }]
+              }
+            },
+            sequence: ["block.utib"],
+            preferences: { show_default_blocks: true }
           }
         },
         theme: { color: '#F2A93B' }
