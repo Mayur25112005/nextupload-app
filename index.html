@@ -16,14 +16,7 @@
     padding:40px 20px;position:relative;overflow-x:hidden;}
   h1{font-family:'Space Grotesk',sans-serif;}
 
-  canvas#field{position:fixed;inset:0;width:100%;height:100%;z-index:0;}
-
-  .blob{position:fixed;border-radius:50%;filter:blur(70px);opacity:.35;z-index:0;pointer-events:none;
-    animation:drift 16s ease-in-out infinite;}
-  .blob1{width:420px;height:420px;background:var(--c1);top:-120px;left:-100px;}
-  .blob2{width:380px;height:380px;background:var(--c4);bottom:-140px;right:-100px;animation-delay:-6s;}
-  .blob3{width:300px;height:300px;background:var(--c3);top:40%;right:20%;animation-delay:-11s;}
-  @keyframes drift{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(30px,-20px) scale(1.08);}66%{transform:translate(-20px,25px) scale(.95);}}
+  canvas#field{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:0;pointer-events:none;}
 
   .content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;}
   .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;margin-bottom:40px;}
@@ -35,7 +28,7 @@
   p.sub{color:var(--muted);margin:0 0 44px;text-align:center;max-width:40ch;}
 
   .cards{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;max-width:660px;perspective:1000px;}
-  .card{background:rgba(22,29,46,.75);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:20px;
+  .card{background:rgba(22,29,46,.8);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:20px;
     padding:34px 28px;width:270px;text-decoration:none;color:var(--text);display:block;position:relative;
     transform-style:preserve-3d;transition:transform .3s cubic-bezier(.2,.8,.3,1), box-shadow .3s ease, border-color .3s ease;
     animation:float 5s ease-in-out infinite;}
@@ -43,11 +36,6 @@
   @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
   .card:hover{border-color:var(--c1);transform:translateY(-12px) rotateX(6deg) rotateY(-6deg) scale(1.04);
     box-shadow:0 25px 50px rgba(242,169,59,.22), 0 10px 25px rgba(0,0,0,.45);animation-play-state:paused;}
-  .card::before{content:'';position:absolute;inset:-1px;border-radius:20px;padding:1px;
-    background:linear-gradient(120deg,var(--c1),var(--c4),var(--c3));opacity:0;transition:opacity .3s ease;
-    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
-  .card:hover::before{opacity:1;}
   .card .emoji{font-size:36px;margin-bottom:16px;display:inline-block;transition:transform .3s ease;}
   .card:hover .emoji{transform:scale(1.2) rotate(-8deg);}
   .card h3{font-size:19px;margin:0 0 8px;}
@@ -56,16 +44,12 @@
   .badge{position:absolute;top:14px;right:14px;background:var(--surface);border:1px solid var(--line);color:var(--muted);font-size:11px;padding:3px 8px;border-radius:20px;}
   .glow-btn{margin-top:18px;display:inline-block;background:linear-gradient(135deg,var(--c1),var(--c2));
     color:#191204;font-weight:700;font-size:13px;padding:9px 18px;border-radius:10px;
-    transition:transform .2s ease, box-shadow .2s ease, background-position .4s ease;
-    background-size:200% auto;}
+    transition:transform .2s ease, box-shadow .2s ease, background-position .4s ease;background-size:200% auto;}
   .card:hover .glow-btn{transform:scale(1.08);box-shadow:0 8px 22px rgba(242,169,59,.5);background-position:100% center;}
 </style>
 </head>
 <body>
 <canvas id="field"></canvas>
-<div class="blob blob1"></div>
-<div class="blob blob2"></div>
-<div class="blob blob3"></div>
 
 <div class="content">
   <div class="brand"><span class="dot"></span> NextUpload</div>
@@ -90,42 +74,80 @@
 <script>
 const canvas = document.getElementById('field');
 const ctx = canvas.getContext('2d');
-let w, h, particles = [];
 const colors = ['#F2A93B','#E4572E','#4FD1C5','#B07CF2','#F2EFE9'];
 
-function resize(){
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener('resize', resize);
+let size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+canvas.width = size;
+canvas.height = size;
+const radius = size * 0.38;
+const N = 420;
 
-for(let i=0;i<90;i++){
-  particles.push({
-    x: Math.random()*w,
-    y: Math.random()*h,
-    r: Math.random()*1.6+0.4,
-    color: colors[Math.floor(Math.random()*colors.length)],
-    vx: (Math.random()-0.5)*0.15,
-    vy: (Math.random()-0.5)*0.15,
-    tw: Math.random()*Math.PI*2
+// Distribute points evenly on a sphere (Fibonacci sphere)
+const points = [];
+const golden = Math.PI * (3 - Math.sqrt(5));
+for(let i=0;i<N;i++){
+  const y = 1 - (i / (N - 1)) * 2;
+  const r = Math.sqrt(1 - y*y);
+  const theta = golden * i;
+  points.push({
+    x: Math.cos(theta) * r,
+    y: y,
+    z: Math.sin(theta) * r,
+    color: colors[i % colors.length]
   });
+}
+
+let angleY = 0;
+let angleX = 0.3;
+
+window.addEventListener('resize', () => {
+  size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+  canvas.width = size;
+  canvas.height = size;
+});
+
+function rotate(p, ay, ax){
+  let x = p.x, y = p.y, z = p.z;
+  // rotate around Y
+  let cosA = Math.cos(ay), sinA = Math.sin(ay);
+  let x1 = x*cosA + z*sinA;
+  let z1 = -x*sinA + z*cosA;
+  // rotate around X
+  let cosB = Math.cos(ax), sinB = Math.sin(ax);
+  let y1 = y*cosB - z1*sinB;
+  let z2 = y*sinB + z1*cosB;
+  return {x:x1, y:y1, z:z2};
 }
 
 function draw(){
-  ctx.clearRect(0,0,w,h);
-  particles.forEach(p=>{
-    p.x += p.vx; p.y += p.vy; p.tw += 0.02;
-    if(p.x<0) p.x=w; if(p.x>w) p.x=0;
-    if(p.y<0) p.y=h; if(p.y>h) p.y=0;
-    const alpha = 0.35 + Math.sin(p.tw)*0.35;
+  const cx = canvas.width/2, cy = canvas.height/2;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const projected = points.map(p => {
+    const r = rotate(p, angleY, angleX);
+    const scale = 1 / (2 - r.z);
+    return {
+      x: cx + r.x * radius * scale,
+      y: cy + r.y * radius * scale,
+      z: r.z,
+      size: Math.max(0.6, 2.4 * scale),
+      color: p.color
+    };
+  });
+
+  projected.sort((a,b) => a.z - b.z);
+
+  projected.forEach(p => {
+    const alpha = 0.35 + (p.z + 1) / 2 * 0.65;
     ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
     ctx.fillStyle = p.color;
-    ctx.globalAlpha = Math.max(0.1, alpha);
+    ctx.globalAlpha = alpha;
     ctx.fill();
   });
   ctx.globalAlpha = 1;
+
+  angleY += 0.0032;
   requestAnimationFrame(draw);
 }
 draw();
