@@ -6,7 +6,8 @@
 <title>NextUpload — know what to post next</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
   :root{
     --ink:#0E1420;
@@ -22,47 +23,34 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--ink);
+    background:
+      radial-gradient(circle at 15% 10%, rgba(242,169,59,.10), transparent 35%),
+      radial-gradient(circle at 90% 75%, rgba(228,87,46,.08), transparent 40%),
+      var(--ink);
     color:var(--text);
     font-family:'Inter',sans-serif;
     line-height:1.55;
     -webkit-font-smoothing:antialiased;
+    min-height:100vh;
   }
   h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
   a{color:inherit;}
   .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
 
-  header.top{
-    padding:28px 0 8px;
-  }
-  .brand{
-    display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;
-    font-weight:600;font-size:18px;
-  }
-  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--tally);box-shadow:0 0 10px var(--tally);}
+  header.top{padding:28px 0 8px;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--tally);box-shadow:0 0 12px var(--tally);}
 
   .hero{padding:56px 0 40px;border-bottom:1px solid var(--line);}
-  .hero h1{
-    font-size:44px;line-height:1.12;font-weight:700;margin:0 0 18px;max-width:11ch;
-    letter-spacing:-0.5px;
-  }
+  .hero h1{font-size:44px;line-height:1.12;font-weight:700;margin:0 0 18px;max-width:11ch;letter-spacing:-0.5px;}
   .hero p.sub{color:var(--muted);font-size:17px;max-width:52ch;margin:0 0 32px;}
 
-  .analyzer{
-    background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px;
-    display:flex;gap:6px;max-width:560px;
-  }
-  .analyzer input{
-    flex:1;background:transparent;border:none;color:var(--text);font-size:15px;
-    padding:14px 14px;outline:none;font-family:'Inter',sans-serif;
-  }
+  .analyzer{background:linear-gradient(160deg, var(--surface), #10192a);border:1px solid var(--line);border-radius:14px;padding:6px;display:flex;gap:6px;max-width:560px;transition:border-color .2s ease, box-shadow .2s ease;}
+  .analyzer:focus-within{border-color:var(--amber);box-shadow:0 0 0 3px rgba(242,169,59,.12);}
+  .analyzer input{flex:1;background:transparent;border:none;color:var(--text);font-size:15px;padding:14px 14px;outline:none;font-family:'Inter',sans-serif;}
   .analyzer input::placeholder{color:var(--muted);}
-  .analyzer button{
-    background:var(--amber);color:#191204;border:none;border-radius:9px;
-    padding:0 22px;font-weight:600;font-size:14.5px;cursor:pointer;font-family:'Inter',sans-serif;
-    transition:background .15s ease;
-  }
-  .analyzer button:hover{background:#ffbb4d;}
+  .analyzer button{background:linear-gradient(135deg, var(--amber), #ffbb4d);color:#191204;border:none;border-radius:9px;padding:0 22px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:'Inter',sans-serif;transition:transform .15s ease, box-shadow .15s ease;}
+  .analyzer button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 16px rgba(242,169,59,.35);}
   .analyzer button:disabled{opacity:.55;cursor:progress;}
 
   .hint{color:var(--muted);font-size:13px;margin-top:10px;}
@@ -77,15 +65,17 @@
   .channel-line b{color:var(--text);}
 
   .idea{
-    border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:14px;background:var(--surface);
+    border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:14px;
+    background:linear-gradient(160deg, var(--surface), #131b2c);
+    transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    animation:fadeUp .4s ease both;
   }
+  .idea:hover{transform:translateY(-3px);border-color:var(--amber-dim);box-shadow:0 10px 24px rgba(0,0,0,.3);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
   .idea .n{color:var(--amber);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;margin-bottom:8px;}
   .idea h3{font-size:19px;margin:0 0 10px;font-weight:600;}
   .idea .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-  .idea .tags span{
-    background:var(--surface-2);border:1px solid var(--line);color:var(--muted);
-    font-size:12.5px;padding:4px 10px;border-radius:20px;
-  }
+  .idea .tags span{background:var(--surface-2);border:1px solid var(--line);color:var(--muted);font-size:12.5px;padding:4px 10px;border-radius:20px;}
   .idea .reason{color:var(--muted);font-size:14px;margin:0;}
 
   section.pricing{padding:44px 0 60px;border-top:1px solid var(--line);display:none;}
@@ -94,20 +84,15 @@
   section.pricing > p{color:var(--muted);margin:0 0 26px;font-size:14.5px;}
 
   .plans{border:1px solid var(--line);border-radius:14px;overflow:hidden;}
-  .plan-row{
-    display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:center;
-    padding:18px 22px;border-bottom:1px solid var(--line);
-  }
+  .plan-row{display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line);background:var(--surface);transition:background .2s ease;}
+  .plan-row:hover{background:var(--surface-2);}
   .plan-row:last-child{border-bottom:none;}
   .plan-row .name{font-weight:600;font-size:15.5px;}
   .plan-row .desc{color:var(--muted);font-size:13.5px;margin-top:3px;}
   .plan-row .price{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--amber);white-space:nowrap;}
-  .plan-row button{
-    background:transparent;border:1px solid var(--amber);color:var(--amber);
-    padding:9px 18px;border-radius:8px;font-weight:600;font-size:13.5px;cursor:pointer;
-    font-family:'Inter',sans-serif;white-space:nowrap;
-  }
-  .plan-row button:hover{background:var(--amber);color:#191204;}
+  .plan-row button{background:transparent;border:1px solid var(--amber);color:var(--amber);padding:9px 18px;border-radius:8px;font-weight:600;font-size:13.5px;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:transform .15s ease, box-shadow .15s ease, background .15s ease;}
+  .plan-row button:hover:not(:disabled){background:var(--amber);color:#191204;transform:translateY(-1px);box-shadow:0 6px 16px rgba(242,169,59,.3);}
+  .plan-row button:disabled{opacity:.55;cursor:progress;}
 
   .disclaimer{color:var(--muted);font-size:12.5px;margin-top:18px;max-width:60ch;}
 
@@ -115,44 +100,16 @@
   .locked-heading{color:var(--muted);font-size:13.5px;margin:0 0 14px;}
   .locked-card{position:relative;overflow:hidden;}
   .blur-content{filter:blur(5px);user-select:none;pointer-events:none;}
-  .lock-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(14,20,32,.4);}
+  .lock-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(14,20,32,.4);animation:pulse 2.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:.85;}50%{opacity:1;}}
 
-  /* modal */
-  .overlay{
-    position:fixed;inset:0;background:rgba(6,9,16,.72);display:none;align-items:center;justify-content:center;
-    padding:20px;z-index:50;
-  }
+  .overlay{position:fixed;inset:0;background:rgba(6,9,16,.75);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;}
   .overlay.show{display:flex;}
-  .modal{
-    background:var(--surface);border:1px solid var(--line);border-radius:16px;max-width:420px;width:100%;
-    padding:28px;
-  }
-  .modal h3{margin:0 0 6px;font-size:19px;}
-  .modal p.small{color:var(--muted);font-size:13.5px;margin:0 0 18px;}
-  .qr-box{background:#fff;border-radius:10px;padding:14px;display:flex;justify-content:center;margin-bottom:14px;}
-  .qr-box img{width:180px;height:180px;display:block;}
-  .upi-line{
-    display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);
-    border:1px solid var(--line);border-radius:9px;padding:10px 14px;font-size:13.5px;margin-bottom:18px;
-  }
-  .upi-line code{color:var(--amber);}
-  .modal label{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px;}
-  .modal input{
-    width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
-    color:var(--text);padding:11px 12px;font-size:14px;font-family:'Inter',sans-serif;outline:none;
-  }
-  .modal .actions{display:flex;gap:10px;margin-top:20px;}
-  .modal .actions button{
-    flex:1;border-radius:9px;padding:12px;font-weight:600;font-size:14px;cursor:pointer;border:none;
-    font-family:'Inter',sans-serif;
-  }
-  .modal .actions button:disabled{opacity:.55;cursor:progress;}
-  .btn-cancel{background:transparent;color:var(--muted);border:1px solid var(--line) !important;}
-  .btn-confirm{background:var(--amber);color:#191204;}
-
-  .pay-status{margin-top:16px;text-align:center;font-size:14px;color:var(--muted);min-height:1.2em;}
+  .modal{background:linear-gradient(160deg, var(--surface), #10192a);border:1px solid var(--line);border-radius:16px;max-width:380px;width:100%;padding:36px 28px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.5);animation:popIn .25s cubic-bezier(.2,.8,.3,1);}
+  @keyframes popIn{from{opacity:0;transform:scale(.94);}to{opacity:1;transform:scale(1);}}
+  .pay-status{font-size:15px;color:var(--muted);min-height:1.4em;}
   .pay-status.success{color:#6fdc8c;font-weight:600;}
-  .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:-2px;}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:-3px;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
   footer{padding:30px 0 50px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);}
@@ -183,7 +140,7 @@
       <input id="channelInput" type="text" placeholder="youtube.com/@yourchannel or channel link" />
       <button id="analyzeBtn">Analyze — free</button>
     </div>
-    <p class="hint">First analysis is <b>free</b>. One per browser — after that, unlock more ideas below.</p>
+    <p class="hint">First analysis is <b>free</b>. One per network — after that, unlock more ideas below.</p>
     <p class="status" id="status"></p>
   </div>
 </section>
@@ -257,27 +214,8 @@
   <div class="wrap">NextUpload · built for creators who want a data-based next step, not a promise.</div>
 </footer>
 
-<!-- Payment modal -->
 <div class="overlay" id="payOverlay">
   <div class="modal">
-    <h3 id="modalPlanName">Unlock pack</h3>
-    <p class="small">Scan the QR and pay via any UPI app. Once done, tap "I've Paid" below.</p>
-
-    <div class="qr-box">
-      <img id="qrImg" src="" alt="UPI QR code" />
-    </div>
-    <div class="upi-line">
-      <span>UPI ID</span>
-      <code>yashy7630@okhdfcbank</code>
-    </div>
-
-    <label for="emailInput">Your email (optional, for support)</label>
-    <input id="emailInput" type="email" placeholder="you@email.com" />
-
-    <div class="actions">
-      <button class="btn-cancel" id="cancelPay">Cancel</button>
-      <button class="btn-confirm" id="confirmPay">I've Paid ✅</button>
-    </div>
     <div id="payStatus" class="pay-status"></div>
   </div>
 </div>
@@ -290,8 +228,12 @@ const resultsSection = document.getElementById('resultsSection');
 const pricingSection = document.getElementById('pricingSection');
 const channelLine = document.getElementById('channelLine');
 const ideasList = document.getElementById('ideasList');
+const payOverlay = document.getElementById('payOverlay');
+const payStatus = document.getElementById('payStatus');
 
 let lastChannelUrl = '';
+let currentPlan = null, currentAmount = 0, currentPlanLabel = '';
+
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxHpCT_GMVGmJimn1274Bo_Rwo3TtwVdcsWEMkpQIDKECrXDT0s7jSyR7hIuyoH_8iv/exec";
 function trackEvent(type, detail, amount){
   fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ type, detail, amount }) }).catch(()=>{});
@@ -301,12 +243,19 @@ if(!localStorage.getItem('nu_visit_logged')){
   localStorage.setItem('nu_visit_logged', '1');
 }
 
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
 function renderIdeas(data, append){
   if(!append) ideasList.innerHTML = '';
   const startIndex = ideasList.children.length;
   data.ideas.forEach((idea, i) => {
     const div = document.createElement('div');
     div.className = 'idea';
+    div.style.animationDelay = (i * 0.06) + 's';
     const tags = (idea.tags || []).map(t => `<span>#${escapeHtml(String(t).replace(/^#/,''))}</span>`).join('');
     div.innerHTML = `
       <div class="n">IDEA ${startIndex + i + 1}</div>
@@ -319,12 +268,6 @@ function renderIdeas(data, append){
   channelLine.innerHTML = `Analyzed <b>${escapeHtml(data.channelTitle)}</b> — ${Number(data.subscribers).toLocaleString('en-IN')} subscribers, ${data.recentVideoCount} recent videos looked at.`;
   resultsSection.classList.add('show');
   pricingSection.classList.add('show');
-}
-
-function escapeHtml(str){
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
 }
 
 async function runAnalyze(plan, append){
@@ -373,19 +316,8 @@ analyzeBtn.addEventListener('click', () => {
   runAnalyze('free', false);
 });
 
-// Payment modal logic
-const payOverlay = document.getElementById('payOverlay');
-const qrImg = document.getElementById('qrImg');
-const modalPlanName = document.getElementById('modalPlanName');
-const cancelPay = document.getElementById('cancelPay');
-const confirmPay = document.getElementById('confirmPay');
-const emailInput = document.getElementById('emailInput');
-const payStatus = document.getElementById('payStatus');
-
-let currentPlan = null, currentAmount = 0, currentCount = 0, currentPlanLabel = '';
-
 document.querySelectorAll('.unlockBtn').forEach(btn => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     if(!lastChannelUrl && !channelInput.value.trim()){
       statusEl.textContent = 'Please enter your channel link above and run the free analysis first.';
       statusEl.classList.add('err');
@@ -394,73 +326,87 @@ document.querySelectorAll('.unlockBtn').forEach(btn => {
     }
     currentPlan = btn.dataset.plan;
     currentAmount = btn.dataset.amount;
-    currentCount = btn.dataset.count;
     currentPlanLabel = btn.closest('.plan-row').querySelector('.name').textContent;
+    const channelToUse = lastChannelUrl || channelInput.value.trim();
 
-    modalPlanName.textContent = `Pay ₹${currentAmount} for ${currentPlanLabel}`;
-    const upiUrl = `upi://pay?pa=yashy7630@okhdfcbank&pn=NextUpload&am=${currentAmount}&cu=INR&tn=${encodeURIComponent(currentPlanLabel)}`;
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
-    emailInput.value = '';
-    payStatus.textContent = '';
-    payStatus.classList.remove('success');
-    confirmPay.disabled = false;
-    cancelPay.disabled = false;
-    confirmPay.textContent = "I've Paid ✅";
-    payOverlay.classList.add('show');
-  });
-});
-
-cancelPay.addEventListener('click', () => payOverlay.classList.remove('show'));
-payOverlay.addEventListener('click', (e) => { if(e.target === payOverlay) payOverlay.classList.remove('show'); });
-
-confirmPay.addEventListener('click', async () => {
-  confirmPay.disabled = true;
-  cancelPay.disabled = true;
-  const channelToUse = lastChannelUrl || channelInput.value.trim();
-  payStatus.innerHTML = '<span class="spinner"></span> Verifying payment…';
-
-  // Log the payment claim to the owner's inbox via Web3Forms
-  try{
-    await fetch('https://api.web3forms.com/submit', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        access_key: 'a3db4b8a-5f8c-4c78-8bf8-1f48df50b4a8',
-        subject: `Payment claim — ${currentPlanLabel} (₹${currentAmount})`,
-        message: `Channel: ${channelToUse}\nPlan: ${currentPlan}\nAmount: ₹${currentAmount}\nUser email: ${emailInput.value || 'not given'}\nTime: ${new Date().toISOString()}`
-      })
-    });
-  }catch(e){}
-
-  trackEvent('payment', currentPlanLabel, currentAmount);
-
-  setTimeout(async () => {
-    payStatus.classList.add('success');
-    payStatus.textContent = '✅ Payment received! Redirecting…';
+    btn.disabled = true;
+    btn.textContent = 'Loading…';
 
     try{
-      const res = await fetch('/api/analyze', {
+      const orderRes = await fetch('/api/create-order', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ channelUrl: channelToUse, plan: currentPlan })
+        body: JSON.stringify({ amount: currentAmount })
       });
-      const data = await res.json();
-      if(!res.ok){
-        payStatus.classList.remove('success');
-        payStatus.textContent = data.error || 'Something went wrong, please try again.';
-        confirmPay.disabled = false;
-        cancelPay.disabled = false;
+      const orderData = await orderRes.json();
+      btn.disabled = false;
+      btn.textContent = 'Unlock';
+
+      if(!orderRes.ok){
+        alert(orderData.error || 'Could not start payment, please try again.');
         return;
       }
-      localStorage.setItem('nu_unlocked_data', JSON.stringify(data));
-      setTimeout(() => { window.location.href = 'unlocked.html'; }, 1200);
+
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: 'INR',
+        name: 'NextUpload',
+        description: currentPlanLabel,
+        order_id: orderData.orderId,
+        handler: async function(response){
+          payOverlay.classList.add('show');
+          payStatus.classList.remove('success');
+          payStatus.innerHTML = '<span class="spinner"></span> Verifying payment…';
+
+          try{
+            const verifyRes = await fetch('/api/verify-payment', {
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if(!verifyData.verified){
+              payStatus.textContent = 'Verification failed. Contact support with payment ID: ' + response.razorpay_payment_id;
+              return;
+            }
+
+            trackEvent('payment', currentPlanLabel, currentAmount);
+            payStatus.classList.add('success');
+            payStatus.textContent = '✅ Payment verified! Fetching your ideas…';
+
+            const res = await fetch('/api/analyze', {
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ channelUrl: channelToUse, plan: currentPlan })
+            });
+            const data = await res.json();
+            if(!res.ok){
+              payStatus.classList.remove('success');
+              payStatus.textContent = data.error || 'Something went wrong, please try again.';
+              return;
+            }
+            localStorage.setItem('nu_unlocked_data', JSON.stringify(data));
+            setTimeout(() => { window.location.href = 'unlocked.html'; }, 1000);
+          }catch(e){
+            payStatus.textContent = 'Network error, please try again.';
+          }
+        },
+        theme: { color: '#F2A93B' }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
     }catch(e){
-      payStatus.classList.remove('success');
-      payStatus.textContent = 'Network error, please try again.';
-      confirmPay.disabled = false;
-      cancelPay.disabled = false;
+      alert('Network error, please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Unlock';
     }
-  }, 1600);
+  });
 });
 </script>
 
