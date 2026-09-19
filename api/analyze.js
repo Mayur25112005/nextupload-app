@@ -19,6 +19,24 @@ module.exports = async function handler(req, res) {
 
   try {
     const { channelUrl, plan = "free", email = "" } = req.body || {};
+    
+    if (plan === "free") {
+      const clientIp = (req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "unknown";
+      const GAS_URL = "https://script.google.com/macros/s/AKfycbxHpCT_GMVGmJimn1274Bo_Rwo3TtwVdcsWEMkpQIDKECrXDT0s7jSyR7hIuyoH_8iv/exec";
+      try {
+        const checkRes = await fetch(GAS_URL, {
+          method: "POST",
+          body: JSON.stringify({ type: "check-free", ip: clientIp }),
+        });
+        const checkData = await checkRes.json();
+        if (checkData.alreadyUsed) {
+          res.status(403).json({ error: "Free analysis already used from this network. Please unlock a pack to get more ideas." });
+          return;
+        }
+      } catch (e) {
+        // If the check fails, let the free analysis through rather than blocking a real user
+      }
+    }
 
     if (!channelUrl || typeof channelUrl !== "string") {
       res.status(400).json({ error: "Please enter your channel link or @handle." });
