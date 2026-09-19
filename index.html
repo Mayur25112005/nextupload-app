@@ -6,41 +6,51 @@
 <title>NextUpload — what do you need?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{--ink:#0E1420;--surface:#161D2E;--line:#2A3550;--text:#F2EFE9;--muted:#9AA3B5;--amber:#F2A93B;--tally:#E4572E;}
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--ink);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+  body{margin:0;background:
+      radial-gradient(circle at 20% 15%, rgba(242,169,59,.12), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(228,87,46,.10), transparent 45%),
+      var(--ink);
+    color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
   h1{font-family:'Space Grotesk',sans-serif;}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:18px;margin-bottom:36px;}
-  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--tally);}
-  h1{font-size:28px;margin:0 0 10px;text-align:center;}
-  p.sub{color:var(--muted);margin:0 0 36px;text-align:center;max-width:40ch;}
-  .cards{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;max-width:640px;}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:30px 26px;width:260px;text-decoration:none;color:var(--text);transition:border-color .15s ease, transform .15s ease;display:block;position:relative;}
-  .card:hover{border-color:var(--amber);transform:translateY(-2px);}
-  .card .emoji{font-size:32px;margin-bottom:14px;}
-  .card h3{font-size:18px;margin:0 0 8px;}
-  .card p{color:var(--muted);font-size:13.5px;margin:0;}
-  .card.disabled{opacity:.5;cursor:not-allowed;pointer-events:none;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;margin-bottom:40px;}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--tally);box-shadow:0 0 14px var(--tally);}
+  h1{font-size:30px;margin:0 0 10px;text-align:center;}
+  p.sub{color:var(--muted);margin:0 0 40px;text-align:center;max-width:40ch;}
+  .cards{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;max-width:640px;perspective:900px;}
+  .card{background:linear-gradient(160deg, var(--surface), #10192a);border:1px solid var(--line);border-radius:18px;padding:32px 26px;width:260px;text-decoration:none;color:var(--text);display:block;position:relative;
+    transform-style:preserve-3d;transition:transform .25s cubic-bezier(.2,.8,.3,1), box-shadow .25s ease, border-color .25s ease;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);}
+  .card:hover{border-color:var(--amber);transform:translateY(-8px) rotateX(4deg) rotateY(-4deg) scale(1.02);box-shadow:0 20px 40px rgba(242,169,59,.18), 0 8px 24px rgba(0,0,0,.4);}
+  .card .emoji{font-size:34px;margin-bottom:16px;display:inline-block;transition:transform .25s ease;}
+  .card:hover .emoji{transform:scale(1.15) rotate(-6deg);}
+  .card h3{font-size:19px;margin:0 0 8px;}
+  .card p{color:var(--muted);font-size:13.5px;margin:0;line-height:1.5;}
+  .card.disabled{opacity:.55;cursor:not-allowed;pointer-events:none;}
   .badge{position:absolute;top:14px;right:14px;background:var(--surface);border:1px solid var(--line);color:var(--muted);font-size:11px;padding:3px 8px;border-radius:20px;}
+  .glow-btn{margin-top:16px;display:inline-block;background:linear-gradient(135deg, var(--amber), var(--tally));color:#191204;font-weight:700;font-size:13px;padding:8px 16px;border-radius:9px;transition:transform .2s ease, box-shadow .2s ease;}
+  .card:hover .glow-btn{transform:scale(1.05);box-shadow:0 6px 18px rgba(242,169,59,.4);}
 </style>
 </head>
 <body>
 <div class="brand"><span class="dot"></span> NextUpload</div>
-<h1>Aapko kya chahiye?</h1>
-<p class="sub">Ek option chuno — hum aapke channel ke hisaab se sahi cheez dikhayenge.</p>
+<h1>What do you need?</h1>
+<p class="sub">Pick an option — we'll show you exactly what fits your channel.</p>
 <div class="cards">
   <a href="idea.html" class="card">
     <div class="emoji">🎯</div>
     <h3>Next Video Idea</h3>
-    <p>Apna channel link daalo, hum bata denge next video kya banayein — title, tags sab.</p>
+    <p>Drop your channel link and we'll tell you what to post next — title, tags, all of it.</p>
+    <span class="glow-btn">Start →</span>
   </a>
   <a href="#" class="card disabled">
     <span class="badge">Coming soon</span>
     <div class="emoji">🎨</div>
-    <h3>Thumbnail Banao</h3>
-    <p>Video title daalo, AI copyright-free thumbnail bana dega.</p>
+    <h3>Make a Thumbnail</h3>
+    <p>Enter your video title and AI generates a copyright-free thumbnail.</p>
   </a>
 </div>
 </body>
