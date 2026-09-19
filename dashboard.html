@@ -36,12 +36,24 @@
     -webkit-background-clip:text;background-clip:text;color:transparent;background-size:300% auto;animation:shine 7s linear infinite;}
   @keyframes shine{to{background-position:300% center;}}
   p.sub{color:var(--muted);margin:0 0 8px;font-size:14.5px;}
-  p.updated{color:var(--muted);font-size:12.5px;margin:0 0 26px;}
+  p.updated{color:var(--muted);font-size:12.5px;margin:0 0 20px;}
+
+  .controls{
+    display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:30px;
+    background:rgba(22,29,46,.6);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+  }
+  .controls label{font-size:13px;color:var(--muted);}
+  .controls select, .controls input[type="date"]{
+    background:var(--surface-2);color:var(--text);border:1px solid var(--line);border-radius:8px;
+    padding:8px 10px;font-family:'Inter',sans-serif;font-size:13.5px;
+  }
+  .controls select:focus, .controls input[type="date"]:focus{outline:1px solid var(--c1);}
 
   button#fetchBtn{
     background:linear-gradient(135deg, var(--c1), #ffbb4d);color:#191204;border:none;border-radius:9px;
-    padding:11px 22px;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:30px;
+    padding:11px 22px;font-weight:700;font-size:14px;cursor:pointer;
     font-family:'Inter',sans-serif;transition:transform .15s ease, box-shadow .15s ease;
+    margin-left:auto;
   }
   button#fetchBtn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(242,169,59,.3);}
   button#fetchBtn:disabled{opacity:.6;cursor:progress;}
@@ -70,10 +82,13 @@
   .stat2 .value{font-weight:700;font-size:16px;color:var(--c3);font-family:'Space Grotesk',sans-serif;}
 
   .empty-note{color:var(--muted);font-size:13px;margin-top:24px;text-align:center;}
+  .hint{color:var(--muted);font-size:13px;text-align:center;margin-top:40px;}
 
   @media (max-width:520px){
     .stats{grid-template-columns:1fr;}
     .stats-secondary{grid-template-columns:1fr;}
+    .controls{flex-direction:column;align-items:stretch;}
+    button#fetchBtn{margin-left:0;width:100%;}
   }
 </style>
 </head>
@@ -81,45 +96,76 @@
 <div class="wrap">
   <div class="brand"><span class="dot"></span> NextUpload</div>
   <h1>Dashboard</h1>
-  <p class="sub">Live visits, payments &amp; earnings across your site.</p>
+  <p class="sub">Visits, payments &amp; earnings across your site.</p>
   <p class="updated" id="updatedAt"></p>
-  <button id="fetchBtn">↻ Refresh</button>
 
-  <div class="stats">
-    <div class="stat">
-      <div class="icon">👀</div>
-      <div class="label">Total Visits</div>
-      <div class="value" id="visits">—</div>
-    </div>
-    <div class="stat">
-      <div class="icon">💳</div>
-      <div class="label">Total Payments</div>
-      <div class="value" id="payments">—</div>
-    </div>
-    <div class="stat">
-      <div class="icon">💰</div>
-      <div class="label">Total Earnings</div>
-      <div class="value" id="earnings">—</div>
-    </div>
+  <div class="controls">
+    <label for="rangeSelect">Range:</label>
+    <select id="rangeSelect">
+      <option value="date">Specific date</option>
+      <option value="all">All time</option>
+    </select>
+    <label for="dateInput">Date:</label>
+    <input type="date" id="dateInput" />
+    <button id="fetchBtn">↻ Fetch details</button>
   </div>
 
-  <div class="stats-secondary">
-    <div class="stat2">
-      <span class="label">Conversion rate (visits → payments)</span>
-      <span class="value" id="conversion">—</span>
+  <div id="results" style="display:none;">
+    <div class="stats">
+      <div class="stat">
+        <div class="icon">👀</div>
+        <div class="label">Total Visits</div>
+        <div class="value" id="visits">—</div>
+      </div>
+      <div class="stat">
+        <div class="icon">💳</div>
+        <div class="label">Total Payments</div>
+        <div class="value" id="payments">—</div>
+      </div>
+      <div class="stat">
+        <div class="icon">💰</div>
+        <div class="label">Total Earnings</div>
+        <div class="value" id="earnings">—</div>
+      </div>
     </div>
-    <div class="stat2">
-      <span class="label">Average payment value</span>
-      <span class="value" id="avgPayment">—</span>
+
+    <div class="stats-secondary">
+      <div class="stat2">
+        <span class="label">Conversion rate (visits → payments)</span>
+        <span class="value" id="conversion">—</span>
+      </div>
+      <div class="stat2">
+        <span class="label">Average payment value</span>
+        <span class="value" id="avgPayment">—</span>
+      </div>
     </div>
+
+    <p class="empty-note" id="emptyNote" style="display:none;">No data for this range yet.</p>
   </div>
 
-  <p class="empty-note" id="emptyNote" style="display:none;">No data yet — numbers will appear here once people start visiting and paying.</p>
+  <p class="hint" id="hintText">Pick a date (or choose "All time") and press <strong>Fetch details</strong> to load numbers.</p>
 </div>
 
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxHpCT_GMVGmJimn1274Bo_Rwo3TtwVdcsWEMkpQIDKECrXDT0s7jSyR7hIuyoH_8iv/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyDDTApNqdO-4x889VvWiUagDRs3-S_i6HJmfxQPT78tAFOdJuNSZBTJ_vCn9J5Kh2ymw/exec";
 const fetchBtn = document.getElementById('fetchBtn');
+const rangeSelect = document.getElementById('rangeSelect');
+const dateInput = document.getElementById('dateInput');
+const resultsBlock = document.getElementById('results');
+const hintText = document.getElementById('hintText');
+
+// Default the date field to today, but DO NOT auto-fetch.
+(function setDefaultDate(){
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  dateInput.value = `${yyyy}-${mm}-${dd}`;
+})();
+
+rangeSelect.addEventListener('change', () => {
+  dateInput.disabled = (rangeSelect.value === 'all');
+});
 
 function fmtINR(n){
   return '₹' + Number(n || 0).toLocaleString('en-IN');
@@ -129,7 +175,12 @@ async function loadStats(){
   fetchBtn.disabled = true;
   fetchBtn.textContent = 'Loading…';
   try{
-    const res = await fetch(GAS_URL);
+    let url = GAS_URL;
+    if (rangeSelect.value === 'date' && dateInput.value) {
+      url += '?date=' + encodeURIComponent(dateInput.value);
+    }
+
+    const res = await fetch(url);
     const data = await res.json();
 
     const visits = Number(data.visits || 0);
@@ -148,16 +199,21 @@ async function loadStats(){
       : '—';
 
     document.getElementById('emptyNote').style.display = (visits === 0 && payments === 0) ? 'block' : 'none';
-    document.getElementById('updatedAt').textContent = 'Last updated: ' + new Date().toLocaleString('en-IN');
+
+    const label = rangeSelect.value === 'all' ? 'All time' : dateInput.value;
+    document.getElementById('updatedAt').textContent = 'Showing: ' + label + ' · Last updated: ' + new Date().toLocaleString('en-IN');
+
+    resultsBlock.style.display = 'block';
+    hintText.style.display = 'none';
   }catch(e){
     document.getElementById('updatedAt').textContent = 'Could not load stats — check your connection and try again.';
   }
   fetchBtn.disabled = false;
-  fetchBtn.textContent = '↻ Refresh';
+  fetchBtn.textContent = '↻ Fetch details';
 }
 
 fetchBtn.addEventListener('click', loadStats);
-loadStats();
+// NOTE: intentionally no loadStats() call here — data only loads on button press.
 </script>
 </body>
 </html>
