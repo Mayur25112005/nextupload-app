@@ -11,15 +11,15 @@
   :root{--ink:#0A0E1A;--surface:#161D2E;--line:#2A3550;--text:#F2EFE9;--muted:#9AA3B5;
     --c1:#F2A93B;--c2:#E4572E;--c3:#4FD1C5;--c4:#B07CF2;}
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--ink);color:var(--text);font-family:'Inter',sans-serif;
-    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:40px 20px;position:relative;overflow-x:hidden;}
-  h1{font-family:'Space Grotesk',sans-serif;}
+  body{margin:0;background:var(--ink);color:var(--text);font-family:'Inter',sans-serif;position:relative;overflow-x:hidden;}
+  h1,h2{font-family:'Space Grotesk',sans-serif;}
 
-  canvas#field{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:0;pointer-events:none;}
+  canvas#field{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:0;pointer-events:none;opacity:.5;}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(circle at 50% 32%, rgba(10,14,26,.92) 0%, rgba(10,14,26,.55) 38%, transparent 68%);}
 
-  .content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;margin-bottom:40px;}
+  .content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;padding:64px 20px 20px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;margin-bottom:36px;}
   .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--c2);box-shadow:0 0 16px var(--c2);animation:blink 2s ease-in-out infinite;}
   @keyframes blink{0%,100%{opacity:1;}50%{opacity:.4;}}
   h1{font-size:34px;margin:0 0 10px;text-align:center;background:linear-gradient(90deg,var(--c1),var(--c2) 40%,var(--c4) 75%,var(--c3));
@@ -27,8 +27,8 @@
   @keyframes shine{to{background-position:300% center;}}
   p.sub{color:var(--muted);margin:0 0 44px;text-align:center;max-width:40ch;}
 
-  .cards{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;max-width:660px;perspective:1000px;}
-  .card{background:rgba(22,29,46,.8);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:20px;
+  .cards{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;max-width:660px;perspective:1000px;margin-bottom:90px;}
+  .card{background:rgba(22,29,46,.85);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:20px;
     padding:34px 28px;width:270px;text-decoration:none;color:var(--text);display:block;position:relative;
     transform-style:preserve-3d;transition:transform .3s cubic-bezier(.2,.8,.3,1), box-shadow .3s ease, border-color .3s ease;
     animation:float 5s ease-in-out infinite;}
@@ -46,15 +46,50 @@
     color:#191204;font-weight:700;font-size:13px;padding:9px 18px;border-radius:10px;
     transition:transform .2s ease, box-shadow .2s ease, background-position .4s ease;background-size:200% auto;}
   .card:hover .glow-btn{transform:scale(1.08);box-shadow:0 8px 22px rgba(242,169,59,.5);background-position:100% center;}
+
+  .features{max-width:900px;width:100%;margin-bottom:70px;}
+  .features h2{text-align:center;font-size:24px;margin:0 0 8px;}
+  .features > p{text-align:center;color:var(--muted);font-size:14px;margin:0 0 40px;}
+  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .feat{background:rgba(22,29,46,.7);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;
+    padding:26px 22px;text-align:center;transition:transform .25s ease, border-color .25s ease;}
+  .feat:hover{transform:translateY(-6px);}
+  .feat .ic{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:22px;margin:0 auto 14px;}
+  .feat:nth-child(1) .ic{background:rgba(242,169,59,.15);border:1px solid rgba(242,169,59,.35);}
+  .feat:nth-child(1):hover{border-color:var(--c1);}
+  .feat:nth-child(2) .ic{background:rgba(79,209,197,.15);border:1px solid rgba(79,209,197,.35);}
+  .feat:nth-child(2):hover{border-color:var(--c3);}
+  .feat:nth-child(3) .ic{background:rgba(176,124,242,.15);border:1px solid rgba(176,124,242,.35);}
+  .feat:nth-child(3):hover{border-color:var(--c4);}
+  .feat h3{font-size:15.5px;margin:0 0 8px;}
+  .feat p{color:var(--muted);font-size:13px;margin:0;line-height:1.5;}
+
+  .strip{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;max-width:760px;margin-bottom:60px;}
+  .pill{display:flex;align-items:center;gap:8px;background:rgba(22,29,46,.7);border:1px solid var(--line);
+    border-radius:30px;padding:10px 18px;font-size:13px;color:var(--muted);}
+  .pill .sq{width:8px;height:8px;border-radius:50%;}
+  .pill:nth-child(1) .sq{background:var(--c1);}
+  .pill:nth-child(2) .sq{background:var(--c3);}
+  .pill:nth-child(3) .sq{background:var(--c4);}
+  .pill:nth-child(4) .sq{background:var(--c2);}
+
+  footer{position:relative;z-index:2;text-align:center;color:var(--muted);font-size:13px;padding:24px 20px 40px;}
+
+  @media (max-width:640px){
+    .feat-grid{grid-template-columns:1fr;}
+  }
 </style>
 </head>
 <body>
 <canvas id="field"></canvas>
+<div class="vignette"></div>
 
 <div class="content">
   <div class="brand"><span class="dot"></span> NextUpload</div>
   <h1>What do you need?</h1>
   <p class="sub">Pick an option — we'll show you exactly what fits your channel.</p>
+
   <div class="cards">
     <a href="idea.html" class="card">
       <div class="emoji">🎯</div>
@@ -69,20 +104,50 @@
       <p>Enter your video title and AI generates a copyright-free thumbnail.</p>
     </a>
   </div>
+
+  <div class="features">
+    <h2>Why creators use NextUpload</h2>
+    <p>Built to turn your own channel data into a clear next move.</p>
+    <div class="feat-grid">
+      <div class="feat">
+        <div class="ic">📊</div>
+        <h3>Real channel data</h3>
+        <p>We pull your actual recent videos, views and tags — not generic trends.</p>
+      </div>
+      <div class="feat">
+        <div class="ic">🤖</div>
+        <h3>AI-powered ideas</h3>
+        <p>Google Gemini studies what's working and suggests your next upload.</p>
+      </div>
+      <div class="feat">
+        <div class="ic">🔒</div>
+        <h3>Secure payments</h3>
+        <p>Every unlock is verified through Razorpay — no fake claims get through.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="pill"><span class="sq"></span> Free first analysis</div>
+    <div class="pill"><span class="sq"></span> Title + tags included</div>
+    <div class="pill"><span class="sq"></span> Reasoning for every idea</div>
+    <div class="pill"><span class="sq"></span> Packs from ₹20</div>
+  </div>
 </div>
+
+<footer>NextUpload · built for creators who want a data-based next step, not a promise.</footer>
 
 <script>
 const canvas = document.getElementById('field');
 const ctx = canvas.getContext('2d');
 const colors = ['#F2A93B','#E4572E','#4FD1C5','#B07CF2','#F2EFE9'];
 
-let size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+let size = Math.min(window.innerWidth, window.innerHeight) * 0.85;
 canvas.width = size;
 canvas.height = size;
 const radius = size * 0.38;
-const N = 420;
+const N = 380;
 
-// Distribute points evenly on a sphere (Fibonacci sphere)
 const points = [];
 const golden = Math.PI * (3 - Math.sqrt(5));
 for(let i=0;i<N;i++){
@@ -98,21 +163,19 @@ for(let i=0;i<N;i++){
 }
 
 let angleY = 0;
-let angleX = 0.3;
+const angleX = 0.3;
 
 window.addEventListener('resize', () => {
-  size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+  size = Math.min(window.innerWidth, window.innerHeight) * 0.85;
   canvas.width = size;
   canvas.height = size;
 });
 
 function rotate(p, ay, ax){
   let x = p.x, y = p.y, z = p.z;
-  // rotate around Y
   let cosA = Math.cos(ay), sinA = Math.sin(ay);
   let x1 = x*cosA + z*sinA;
   let z1 = -x*sinA + z*cosA;
-  // rotate around X
   let cosB = Math.cos(ax), sinB = Math.sin(ax);
   let y1 = y*cosB - z1*sinB;
   let z2 = y*sinB + z1*cosB;
@@ -130,7 +193,7 @@ function draw(){
       x: cx + r.x * radius * scale,
       y: cy + r.y * radius * scale,
       z: r.z,
-      size: Math.max(0.6, 2.4 * scale),
+      size: Math.max(0.6, 2.2 * scale),
       color: p.color
     };
   });
@@ -138,7 +201,7 @@ function draw(){
   projected.sort((a,b) => a.z - b.z);
 
   projected.forEach(p => {
-    const alpha = 0.35 + (p.z + 1) / 2 * 0.65;
+    const alpha = 0.3 + (p.z + 1) / 2 * 0.6;
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
     ctx.fillStyle = p.color;
