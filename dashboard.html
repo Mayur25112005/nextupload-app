@@ -4,48 +4,159 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>NextUpload — Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--ink:#0E1420;--surface:#161D2E;--line:#2A3550;--text:#F2EFE9;--muted:#9AA3B5;--amber:#F2A93B;}
+  :root{
+    --ink:#0A0E1A;--surface:#161D2E;--surface-2:#1D263C;--line:#2A3550;
+    --text:#F2EFE9;--muted:#9AA3B5;
+    --c1:#F2A93B;--c2:#E4572E;--c3:#4FD1C5;--c4:#B07CF2;
+  }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--ink);color:var(--text);font-family:sans-serif;padding:40px 20px;}
-  .wrap{max-width:600px;margin:0 auto;}
-  h1{font-size:26px;margin-bottom:6px;}
-  p.sub{color:var(--muted);margin-top:0;margin-bottom:26px;}
-  button{background:var(--amber);color:#191204;border:none;border-radius:9px;padding:11px 20px;font-weight:600;font-size:14.5px;cursor:pointer;margin-bottom:26px;}
-  .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-  .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;text-align:center;}
-  .stat .label{color:var(--muted);font-size:13px;margin-bottom:8px;}
-  .stat .value{font-size:26px;font-weight:700;color:var(--amber);}
-  @media (max-width:500px){.stats{grid-template-columns:1fr;}}
+  html{overflow-x:hidden;}
+  body{
+    margin:0;min-height:100vh;
+    background:
+      radial-gradient(circle at 10% 6%, rgba(242,169,59,.14), transparent 30%),
+      radial-gradient(circle at 92% 12%, rgba(176,124,242,.12), transparent 32%),
+      radial-gradient(circle at 15% 92%, rgba(79,209,197,.1), transparent 32%),
+      var(--ink);
+    color:var(--text);font-family:'Inter',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;
+    padding:48px 20px 60px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;margin-bottom:8px;}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--c2);box-shadow:0 0 12px var(--c2);animation:blink 2s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+  h1{font-family:'Space Grotesk',sans-serif;font-size:30px;margin:18px 0 4px;
+    background:linear-gradient(90deg,var(--c1),var(--c2) 40%,var(--c4) 75%,var(--c3));
+    -webkit-background-clip:text;background-clip:text;color:transparent;background-size:300% auto;animation:shine 7s linear infinite;}
+  @keyframes shine{to{background-position:300% center;}}
+  p.sub{color:var(--muted);margin:0 0 8px;font-size:14.5px;}
+  p.updated{color:var(--muted);font-size:12.5px;margin:0 0 26px;}
+
+  button#fetchBtn{
+    background:linear-gradient(135deg, var(--c1), #ffbb4d);color:#191204;border:none;border-radius:9px;
+    padding:11px 22px;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:30px;
+    font-family:'Inter',sans-serif;transition:transform .15s ease, box-shadow .15s ease;
+  }
+  button#fetchBtn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(242,169,59,.3);}
+  button#fetchBtn:disabled{opacity:.6;cursor:progress;}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
+  .stat{
+    background:rgba(22,29,46,.85);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:14px;
+    padding:22px 16px;text-align:center;animation:fadeUp .4s ease both;
+    transition:transform .2s ease, border-color .2s ease;
+  }
+  .stat:hover{transform:translateY(-3px);border-color:var(--c1);}
+  .stat:nth-child(1){animation-delay:.02s;}
+  .stat:nth-child(2){animation-delay:.08s;}
+  .stat:nth-child(3){animation-delay:.14s;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .stat .icon{font-size:22px;margin-bottom:8px;}
+  .stat .label{color:var(--muted);font-size:12.5px;margin-bottom:8px;}
+  .stat .value{font-size:27px;font-weight:700;color:var(--c1);font-family:'Space Grotesk',sans-serif;}
+
+  .stats-secondary{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .stat2{
+    background:rgba(22,29,46,.6);border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;display:flex;justify-content:space-between;align-items:center;
+  }
+  .stat2 .label{color:var(--muted);font-size:13px;}
+  .stat2 .value{font-weight:700;font-size:16px;color:var(--c3);font-family:'Space Grotesk',sans-serif;}
+
+  .empty-note{color:var(--muted);font-size:13px;margin-top:24px;text-align:center;}
+
+  @media (max-width:520px){
+    .stats{grid-template-columns:1fr;}
+    .stats-secondary{grid-template-columns:1fr;}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>NextUpload Dashboard</h1>
-  <p class="sub">Live visits, payments &amp; earnings.</p>
-  <button id="fetchBtn">Refresh</button>
+  <div class="brand"><span class="dot"></span> NextUpload</div>
+  <h1>Dashboard</h1>
+  <p class="sub">Live visits, payments &amp; earnings across your site.</p>
+  <p class="updated" id="updatedAt"></p>
+  <button id="fetchBtn">↻ Refresh</button>
+
   <div class="stats">
-    <div class="stat"><div class="label">Total Visits</div><div class="value" id="visits">—</div></div>
-    <div class="stat"><div class="label">Total Payments</div><div class="value" id="payments">—</div></div>
-    <div class="stat"><div class="label">Total Earnings</div><div class="value" id="earnings">—</div></div>
+    <div class="stat">
+      <div class="icon">👀</div>
+      <div class="label">Total Visits</div>
+      <div class="value" id="visits">—</div>
+    </div>
+    <div class="stat">
+      <div class="icon">💳</div>
+      <div class="label">Total Payments</div>
+      <div class="value" id="payments">—</div>
+    </div>
+    <div class="stat">
+      <div class="icon">💰</div>
+      <div class="label">Total Earnings</div>
+      <div class="value" id="earnings">—</div>
+    </div>
   </div>
+
+  <div class="stats-secondary">
+    <div class="stat2">
+      <span class="label">Conversion rate (visits → payments)</span>
+      <span class="value" id="conversion">—</span>
+    </div>
+    <div class="stat2">
+      <span class="label">Average payment value</span>
+      <span class="value" id="avgPayment">—</span>
+    </div>
+  </div>
+
+  <p class="empty-note" id="emptyNote" style="display:none;">No data yet — numbers will appear here once people start visiting and paying.</p>
 </div>
+
 <script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxHpCT_GMVGmJimn1274Bo_Rwo3TtwVdcsWEMkpQIDKECrXDT0s7jSyR7hIuyoH_8iv/exec";
+const fetchBtn = document.getElementById('fetchBtn');
+
+function fmtINR(n){
+  return '₹' + Number(n || 0).toLocaleString('en-IN');
+}
+
 async function loadStats(){
-  document.getElementById('fetchBtn').textContent = 'Loading...';
+  fetchBtn.disabled = true;
+  fetchBtn.textContent = 'Loading…';
   try{
     const res = await fetch(GAS_URL);
     const data = await res.json();
-    document.getElementById('visits').textContent = data.visits;
-    document.getElementById('payments').textContent = data.payments;
-    document.getElementById('earnings').textContent = '₹' + data.earnings;
+
+    const visits = Number(data.visits || 0);
+    const payments = Number(data.payments || 0);
+    const earnings = Number(data.earnings || 0);
+
+    document.getElementById('visits').textContent = visits.toLocaleString('en-IN');
+    document.getElementById('payments').textContent = payments.toLocaleString('en-IN');
+    document.getElementById('earnings').textContent = fmtINR(earnings);
+
+    document.getElementById('conversion').textContent = visits > 0
+      ? ((payments / visits) * 100).toFixed(1) + '%'
+      : '—';
+    document.getElementById('avgPayment').textContent = payments > 0
+      ? fmtINR(Math.round(earnings / payments))
+      : '—';
+
+    document.getElementById('emptyNote').style.display = (visits === 0 && payments === 0) ? 'block' : 'none';
+    document.getElementById('updatedAt').textContent = 'Last updated: ' + new Date().toLocaleString('en-IN');
   }catch(e){
-    alert('Fetch failed, try again.');
+    document.getElementById('updatedAt').textContent = 'Could not load stats — check your connection and try again.';
   }
-  document.getElementById('fetchBtn').textContent = 'Refresh';
+  fetchBtn.disabled = false;
+  fetchBtn.textContent = '↻ Refresh';
 }
-document.getElementById('fetchBtn').addEventListener('click', loadStats);
+
+fetchBtn.addEventListener('click', loadStats);
 loadStats();
 </script>
 </body>
