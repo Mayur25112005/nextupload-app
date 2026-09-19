@@ -10,46 +10,47 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
   :root{
-    --ink:#0E1420;
-    --surface:#161D2E;
-    --surface-2:#1D263C;
-    --line:#2A3550;
-    --text:#F2EFE9;
-    --muted:#9AA3B5;
-    --amber:#F2A93B;
-    --amber-dim:#8a6a2b;
-    --tally:#E4572E;
+    --ink:#0A0E1A;--surface:#161D2E;--surface-2:#1D263C;--line:#2A3550;
+    --text:#F2EFE9;--muted:#9AA3B5;
+    --c1:#F2A93B;--c2:#E4572E;--c3:#4FD1C5;--c4:#B07CF2;
   }
   *{box-sizing:border-box;}
+  html{overflow-x:hidden;}
   html,body{margin:0;padding:0;}
   body{
     background:
-      radial-gradient(circle at 15% 10%, rgba(242,169,59,.10), transparent 35%),
-      radial-gradient(circle at 90% 75%, rgba(228,87,46,.08), transparent 40%),
+      radial-gradient(circle at 10% 6%, rgba(242,169,59,.14), transparent 30%),
+      radial-gradient(circle at 92% 12%, rgba(176,124,242,.12), transparent 32%),
+      radial-gradient(circle at 15% 92%, rgba(79,209,197,.1), transparent 32%),
       var(--ink);
-    color:var(--text);
-    font-family:'Inter',sans-serif;
-    line-height:1.55;
-    -webkit-font-smoothing:antialiased;
-    min-height:100vh;
+    color:var(--text);font-family:'Inter',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;
+    position:relative;overflow-x:hidden;
   }
   h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
   a{color:inherit;}
-  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;position:relative;z-index:2;}
 
-  header.top{padding:28px 0 8px;}
+  canvas#field{position:fixed;top:18%;left:50%;transform:translate(-50%,-50%);z-index:0;pointer-events:none;opacity:.35;}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(circle at 50% 18%, rgba(10,14,26,.85) 0%, rgba(10,14,26,.45) 36%, transparent 62%);}
+
+  header.top{padding:28px 0 8px;position:relative;z-index:2;}
   .brand{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;}
-  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--tally);box-shadow:0 0 12px var(--tally);}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--c2);box-shadow:0 0 12px var(--c2);animation:blink 2s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.4;}}
 
   .hero{padding:56px 0 40px;border-bottom:1px solid var(--line);}
-  .hero h1{font-size:44px;line-height:1.12;font-weight:700;margin:0 0 18px;max-width:11ch;letter-spacing:-0.5px;}
+  .hero h1{font-size:44px;line-height:1.12;font-weight:700;margin:0 0 18px;max-width:12ch;letter-spacing:-0.5px;
+    background:linear-gradient(90deg,var(--c1),var(--c2) 40%,var(--c4) 75%,var(--c3));
+    -webkit-background-clip:text;background-clip:text;color:transparent;background-size:300% auto;animation:shine 7s linear infinite;}
+  @keyframes shine{to{background-position:300% center;}}
   .hero p.sub{color:var(--muted);font-size:17px;max-width:52ch;margin:0 0 32px;}
 
-  .analyzer{background:linear-gradient(160deg, var(--surface), #10192a);border:1px solid var(--line);border-radius:14px;padding:6px;display:flex;gap:6px;max-width:560px;transition:border-color .2s ease, box-shadow .2s ease;}
-  .analyzer:focus-within{border-color:var(--amber);box-shadow:0 0 0 3px rgba(242,169,59,.12);}
+  .analyzer{background:rgba(22,29,46,.85);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:14px;padding:6px;display:flex;gap:6px;max-width:560px;transition:border-color .2s ease, box-shadow .2s ease;}
+  .analyzer:focus-within{border-color:var(--c1);box-shadow:0 0 0 3px rgba(242,169,59,.14);}
   .analyzer input{flex:1;background:transparent;border:none;color:var(--text);font-size:15px;padding:14px 14px;outline:none;font-family:'Inter',sans-serif;}
   .analyzer input::placeholder{color:var(--muted);}
-  .analyzer button{background:linear-gradient(135deg, var(--amber), #ffbb4d);color:#191204;border:none;border-radius:9px;padding:0 22px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:'Inter',sans-serif;transition:transform .15s ease, box-shadow .15s ease;}
+  .analyzer button{background:linear-gradient(135deg, var(--c1), #ffbb4d);color:#191204;border:none;border-radius:9px;padding:0 22px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:'Inter',sans-serif;transition:transform .15s ease, box-shadow .15s ease;}
   .analyzer button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 16px rgba(242,169,59,.35);}
   .analyzer button:disabled{opacity:.55;cursor:progress;}
 
@@ -66,13 +67,13 @@
 
   .idea{
     border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:14px;
-    background:linear-gradient(160deg, var(--surface), #131b2c);
+    background:rgba(22,29,46,.85);backdrop-filter:blur(6px);
     transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease;
     animation:fadeUp .4s ease both;
   }
-  .idea:hover{transform:translateY(-3px);border-color:var(--amber-dim);box-shadow:0 10px 24px rgba(0,0,0,.3);}
+  .idea:hover{transform:translateY(-3px);border-color:var(--c1);box-shadow:0 12px 26px rgba(0,0,0,.3);}
   @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-  .idea .n{color:var(--amber);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;margin-bottom:8px;}
+  .idea .n{color:var(--c1);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;margin-bottom:8px;}
   .idea h3{font-size:19px;margin:0 0 10px;font-weight:600;}
   .idea .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
   .idea .tags span{background:var(--surface-2);border:1px solid var(--line);color:var(--muted);font-size:12.5px;padding:4px 10px;border-radius:20px;}
@@ -84,14 +85,14 @@
   section.pricing > p{color:var(--muted);margin:0 0 26px;font-size:14.5px;}
 
   .plans{border:1px solid var(--line);border-radius:14px;overflow:hidden;}
-  .plan-row{display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line);background:var(--surface);transition:background .2s ease;}
+  .plan-row{display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line);background:rgba(22,29,46,.85);transition:background .2s ease;}
   .plan-row:hover{background:var(--surface-2);}
   .plan-row:last-child{border-bottom:none;}
   .plan-row .name{font-weight:600;font-size:15.5px;}
   .plan-row .desc{color:var(--muted);font-size:13.5px;margin-top:3px;}
-  .plan-row .price{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--amber);white-space:nowrap;}
-  .plan-row button{background:transparent;border:1px solid var(--amber);color:var(--amber);padding:9px 18px;border-radius:8px;font-weight:600;font-size:13.5px;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:transform .15s ease, box-shadow .15s ease, background .15s ease;}
-  .plan-row button:hover:not(:disabled){background:var(--amber);color:#191204;transform:translateY(-1px);box-shadow:0 6px 16px rgba(242,169,59,.3);}
+  .plan-row .price{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--c1);white-space:nowrap;}
+  .plan-row button{background:transparent;border:1px solid var(--c1);color:var(--c1);padding:9px 18px;border-radius:8px;font-weight:600;font-size:13.5px;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:transform .15s ease, box-shadow .15s ease, background .15s ease;}
+  .plan-row button:hover:not(:disabled){background:var(--c1);color:#191204;transform:translateY(-1px);box-shadow:0 6px 16px rgba(242,169,59,.3);}
   .plan-row button:disabled{opacity:.55;cursor:progress;}
 
   .disclaimer{color:var(--muted);font-size:12.5px;margin-top:18px;max-width:60ch;}
@@ -109,10 +110,10 @@
   @keyframes popIn{from{opacity:0;transform:scale(.94);}to{opacity:1;transform:scale(1);}}
   .pay-status{font-size:15px;color:var(--muted);min-height:1.4em;}
   .pay-status.success{color:#6fdc8c;font-weight:600;}
-  .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:-3px;}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--c1);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:-3px;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
-  footer{padding:30px 0 50px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);}
+  footer{padding:30px 0 50px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);position:relative;z-index:2;}
 
   @media (max-width:600px){
     .hero h1{font-size:32px;max-width:none;}
@@ -124,6 +125,8 @@
 </style>
 </head>
 <body>
+<canvas id="field"></canvas>
+<div class="vignette"></div>
 
 <header class="top">
   <div class="wrap">
@@ -408,6 +411,63 @@ document.querySelectorAll('.unlockBtn').forEach(btn => {
     }
   });
 });
+
+// Rotating color sphere background
+const canvas = document.getElementById('field');
+const ctx = canvas.getContext('2d');
+const sphereColors = ['#F2A93B','#E4572E','#4FD1C5','#B07CF2','#F2EFE9'];
+let size = Math.min(window.innerWidth, window.innerHeight) * 0.6;
+canvas.width = size;
+canvas.height = size;
+const radius = size * 0.38;
+const N = 300;
+const points = [];
+const golden = Math.PI * (3 - Math.sqrt(5));
+for(let i=0;i<N;i++){
+  const y = 1 - (i / (N - 1)) * 2;
+  const r = Math.sqrt(1 - y*y);
+  const theta = golden * i;
+  points.push({ x: Math.cos(theta) * r, y: y, z: Math.sin(theta) * r, color: sphereColors[i % sphereColors.length] });
+}
+let angleY = 0;
+const angleX = 0.3;
+window.addEventListener('resize', () => {
+  size = Math.min(window.innerWidth, window.innerHeight) * 0.6;
+  canvas.width = size;
+  canvas.height = size;
+});
+function rotate(p, ay, ax){
+  let x = p.x, y = p.y, z = p.z;
+  let cosA = Math.cos(ay), sinA = Math.sin(ay);
+  let x1 = x*cosA + z*sinA;
+  let z1 = -x*sinA + z*cosA;
+  let cosB = Math.cos(ax), sinB = Math.sin(ax);
+  let y1 = y*cosB - z1*sinB;
+  let z2 = y*sinB + z1*cosB;
+  return {x:x1, y:y1, z:z2};
+}
+function drawSphere(){
+  const cx = canvas.width/2, cy = canvas.height/2;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const projected = points.map(p => {
+    const r = rotate(p, angleY, angleX);
+    const scale = 1 / (2 - r.z);
+    return { x: cx + r.x * radius * scale, y: cy + r.y * radius * scale, z: r.z, size: Math.max(0.5, 2 * scale), color: p.color };
+  });
+  projected.sort((a,b) => a.z - b.z);
+  projected.forEach(p => {
+    const alpha = 0.25 + (p.z + 1) / 2 * 0.55;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = alpha;
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  angleY += 0.003;
+  requestAnimationFrame(drawSphere);
+}
+drawSphere();
 </script>
 
 </body>
